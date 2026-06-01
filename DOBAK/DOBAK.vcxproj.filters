@@ -19,6 +19,12 @@
     <Filter Include="KYM">
       <UniqueIdentifier>{9592fb0e-07f9-4a9e-856d-2e061e104f89}</UniqueIdentifier>
     </Filter>
+    <Filter Include="KYM\CPP">
+      <UniqueIdentifier>{2ec6181a-d993-4095-82b1-a549a2d7d5fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="KYM\Header">
+      <UniqueIdentifier>{41c49f1a-1825-466d-b2ee-cdf1d07c32a0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Console.cpp">
@@ -31,7 +37,7 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="SlotMachine.cpp">
-      <Filter>KYM</Filter>
+      <Filter>KYM\CPP</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -45,7 +51,7 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="SlotMachine.h">
-      <Filter>KYM</Filter>
+      <Filter>KYM\Header</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
