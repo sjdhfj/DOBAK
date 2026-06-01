@@ -16,6 +16,9 @@
     <Filter Include="AH">
       <UniqueIdentifier>{cedac938-f143-4ade-aed5-3b47394cbf94}</UniqueIdentifier>
     </Filter>
+    <Filter Include="KYM">
+      <UniqueIdentifier>{9592fb0e-07f9-4a9e-856d-2e061e104f89}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Console.cpp">
@@ -27,8 +30,8 @@
     <ClCompile Include="SoundManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="UI.cpp">
-      <Filter>AH</Filter>
+    <ClCompile Include="SlotMachine.cpp">
+      <Filter>KYM</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -41,8 +44,8 @@
     <ClInclude Include="Console.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="UI.h">
-      <Filter>AH</Filter>
+    <ClInclude Include="SlotMachine.h">
+      <Filter>KYM</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
