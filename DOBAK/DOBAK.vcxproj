@@ -129,13 +129,15 @@
   <ItemGroup>
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="SlotMachine.cpp" />
+    <ClCompile Include="AsciiArt.cpp" />
+    <ClCompile Include="SlotMachineScene.cpp" />
     <ClCompile Include="SoundManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Console.h" />
     <ClInclude Include="Defines.h" />
-    <ClInclude Include="SlotMachine.h" />
+    <ClInclude Include="AsciiArt.h" />
+    <ClInclude Include="SlotMachineScene.h" />
     <ClInclude Include="SoundManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

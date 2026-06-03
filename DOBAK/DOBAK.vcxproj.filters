@@ -25,6 +25,9 @@
     <Filter Include="KYM\Header">
       <UniqueIdentifier>{41c49f1a-1825-466d-b2ee-cdf1d07c32a0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="KYM\AsciiArts">
+      <UniqueIdentifier>{9c7933fe-e35a-48eb-9891-2c283e32a3db}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Console.cpp">
@@ -36,8 +39,11 @@
     <ClCompile Include="SoundManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SlotMachine.cpp">
+    <ClCompile Include="SlotMachineScene.cpp">
       <Filter>KYM\CPP</Filter>
+    </ClCompile>
+    <ClCompile Include="AsciiArt.cpp">
+      <Filter>KYM\AsciiArts</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -50,8 +56,11 @@
     <ClInclude Include="Console.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="SlotMachine.h">
+    <ClInclude Include="SlotMachineScene.h">
       <Filter>KYM\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="AsciiArt.h">
+      <Filter>KYM\AsciiArts</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
