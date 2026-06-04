@@ -28,6 +28,12 @@
     <Filter Include="KYM\AsciiArts">
       <UniqueIdentifier>{9c7933fe-e35a-48eb-9891-2c283e32a3db}</UniqueIdentifier>
     </Filter>
+    <Filter Include="AH\CPP">
+      <UniqueIdentifier>{0f196f12-5b6a-4e55-a89c-1c0a06acef38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AH\Header">
+      <UniqueIdentifier>{5d0ee0bb-2210-4b7e-93bd-40f7c1e63707}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Console.cpp">
@@ -45,6 +51,15 @@
     <ClCompile Include="AsciiArt.cpp">
       <Filter>KYM\AsciiArts</Filter>
     </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="UI.cpp">
+      <Filter>AH\CPP</Filter>
+    </ClCompile>
+    <ClCompile Include="TitleScene.cpp">
+      <Filter>AH\CPP</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SoundManager.h">
@@ -61,6 +76,18 @@
     </ClInclude>
     <ClInclude Include="AsciiArt.h">
       <Filter>KYM\AsciiArts</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="UI.h">
+      <Filter>AH\CPP</Filter>
+    </ClInclude>
+    <ClInclude Include="UIAsciiObjs.h">
+      <Filter>AH\CPP</Filter>
+    </ClInclude>
+    <ClInclude Include="TitleScene.h">
+      <Filter>AH\Header</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
