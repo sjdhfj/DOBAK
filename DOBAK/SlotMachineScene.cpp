@@ -10,5 +10,7 @@ void Init();
 
 void Init()
 {
-	SetConsoleSize(20, 40);
+	
+
+	
 }
