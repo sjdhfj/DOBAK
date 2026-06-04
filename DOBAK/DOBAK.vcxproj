@@ -128,15 +128,24 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Console.cpp" />
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SlotMachine.cpp" />
     <ClCompile Include="SoundManager.cpp" />
+    <ClCompile Include="TitleScene.cpp" />
+    <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="UIAsciiObjs.h" />
     <ClInclude Include="Console.h" />
     <ClInclude Include="Defines.h" />
+    <ClInclude Include="Enums.h" />
+    <ClInclude Include="GameState.h" />
     <ClInclude Include="SlotMachine.h" />
     <ClInclude Include="SoundManager.h" />
+    <ClInclude Include="TitleScene.h" />
+    <ClInclude Include="UI.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

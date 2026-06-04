@@ -19,6 +19,12 @@
     <Filter Include="KYM">
       <UniqueIdentifier>{9592fb0e-07f9-4a9e-856d-2e061e104f89}</UniqueIdentifier>
     </Filter>
+    <Filter Include="AH\Cpp">
+      <UniqueIdentifier>{82533586-701d-41ac-9d30-61c4a6020ae4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AH\Header">
+      <UniqueIdentifier>{894b2f8d-60bb-4c1e-b111-c0ee9a9fcbb8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Console.cpp">
@@ -33,6 +39,15 @@
     <ClCompile Include="SlotMachine.cpp">
       <Filter>KYM</Filter>
     </ClCompile>
+    <ClCompile Include="TitleScene.cpp">
+      <Filter>AH\Cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="UI.cpp">
+      <Filter>AH\Cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SoundManager.h">
@@ -46,6 +61,24 @@
     </ClInclude>
     <ClInclude Include="SlotMachine.h">
       <Filter>KYM</Filter>
+    </ClInclude>
+    <ClInclude Include="TitleScene.h">
+      <Filter>AH\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="UI.h">
+      <Filter>AH\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="GameState.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Enums.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="UIAsciiObjs.h">
+      <Filter>AH\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
