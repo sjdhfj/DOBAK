@@ -135,6 +135,7 @@
     <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="TitleScene.cpp" />
     <ClCompile Include="UI.cpp" />
+    <ClCompile Include="UIAsciiObjs.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Console.h" />

@@ -60,6 +60,9 @@
     <ClCompile Include="TitleScene.cpp">
       <Filter>AH\CPP</Filter>
     </ClCompile>
+    <ClCompile Include="UIAsciiObjs.cpp">
+      <Filter>AH\CPP</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SoundManager.h">

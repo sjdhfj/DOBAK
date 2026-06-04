@@ -10,3 +10,4 @@ struct UIAsciiObjs
 };
 void AsciiInit(UIAsciiObjs& objs);
 void AsciiUpdate(UIAsciiObjs& objs);
+void AsciiRender(const UIAsciiObjs& objs);

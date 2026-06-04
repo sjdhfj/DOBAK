@@ -7,7 +7,7 @@ int main()
 {
 	GameState state;
 	Init(state);
-	SetConsoleSize(20, 40);
+	SetConsoleSize(80, 40);
 	while (state.isRunning)
 	{
 		state.curTime = GetTickCount64();
