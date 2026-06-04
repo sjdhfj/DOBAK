@@ -7,6 +7,7 @@ int main()
 {
 	GameState state;
 	Init(state);
+	SetConsoleSize(20, 40);
 	while (state.isRunning)
 	{
 		state.curTime = GetTickCount64();
@@ -14,4 +15,5 @@ int main()
 		Render(state);
 		FrameSync(60);
 	}
+	
 }

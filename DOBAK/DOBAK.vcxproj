@@ -130,7 +130,6 @@
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="SlotMachine.cpp" />
     <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="TitleScene.cpp" />
     <ClCompile Include="UI.cpp" />
@@ -142,7 +141,6 @@
     <ClInclude Include="Defines.h" />
     <ClInclude Include="Enums.h" />
     <ClInclude Include="GameState.h" />
-    <ClInclude Include="SlotMachine.h" />
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="TitleScene.h" />
     <ClInclude Include="UI.h" />
