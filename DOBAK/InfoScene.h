@@ -1,6 +1,12 @@
 #pragma once
-#include "GameState.h"
-void InitInfo(GameState& state);
-void UpdateInfo(GameState& state);
-void RenderInfo(GameState& state);
+#include "Scene.h"
+#include "SceneManager.h"
+class InfoScene : public AbstractScene
+{
+public:
+	void Init(GameState& state) override;
+	void Update(GameState& state) override;
+	void Render(const GameState& state) override;
+};
+
 

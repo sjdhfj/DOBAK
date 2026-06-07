@@ -121,7 +121,7 @@ void SetConsoleSettings(int width, int height, bool isFullScreen, const wstring&
 	}
 	else
 	{
-
+		MoveWindow(hWnd, 0, 0, width, height, true);
 	}
 }
 void RenderDialogue(const string& text, int delayTime)
@@ -139,9 +139,16 @@ void SetConsoleWindowStyle(bool showTitleBar)
 {
 	HWND hWnd = GetConsoleWindow();
 	LONG style = GetWindowLong(hWnd, GWL_STYLE);
+	// AND NOT=> NAND
+	style &= ~WS_SIZEBOX & ~WS_MAXIMIZEBOX & ~WS_MINIMIZEBOX & ~WS_SYSMENU;
 
-	style = ~WS_SIZEBOX & ~WS_MAXIMIZEBOX & ~WS_MINIMIZEBOX & ~WS_SYSMENU;
+	if (!showTitleBar)
+		style &= ~WS_CAPTION;
 
+	SetWindowLong(hWnd, GWL_STYLE, style);
+
+	SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0
+		, SWP_NOSIZE | SWP_NOMOVE | SWP_FRAMECHANGED);
 }
 
 void ShakeConsoleWindow(int intensity, int duration, int interval)

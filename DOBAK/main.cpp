@@ -16,5 +16,5 @@ int main()
 		Render(state);
 		FrameSync(60);
 	}
-	SOUND->Release();
+	Release();
 }

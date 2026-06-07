@@ -1,26 +1,16 @@
 #include "InfoScene.h"
 #include "Console.h"
-void InitInfo(GameState& state)
+void InfoScene::Init(GameState& state)
 {
 
 }
-void UpdateInfo(GameState& state)
+void InfoScene::Update(GameState& state)
 {
 	if (GetKeyDown(VK_ESCAPE))
-		state.curScene = Scene::TITLE;
-
-	if (GetKeyDown(VK_LEFT))
-	{
-		state.curInfoMenu = (InfoMenu)std::max((int)InfoMenu::GAME, (int)state.curInfoMenu - 1);
-	}
-	if (GetKeyDown(VK_RIGHT))
-	{
-		state.curInfoMenu = (InfoMenu)std::min((int)InfoMenu::SOUND, (int)state.curInfoMenu + 1);
-	}
-	
+		SceneManager::GetInst()->ChangeScene("TitleScene", state);
 }
 
-void RenderInfo(const GameState& state)
+void InfoScene::Render(const GameState& state)
 {
 	COORD res = GetConsoleResolution();
 	int cx = res.X / 2;

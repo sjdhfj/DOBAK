@@ -1,69 +1,50 @@
 #include "Game.h"
 #include "SlotMachineScene.h"
 #include "SoundManager.h"
+#include "Scene.h"
 #include "TitleScene.h"
 #include "InfoScene.h"
+#include "SceneManager.h"
+#include "ShopScene.h"
 
 void Init(GameState& state)
 {
+	SetConsoleWindowStyle(true);
+	SetConsoleFont(L"NSimSun", { 8, 16 });
 	SOUND->Init();
 	srand((unsigned int)time(nullptr));
 	SetConsoleSize(WIDTH, HEIGHT);
 	SetCursorVisible(false);
+	SetConsoleMouseInputDisable();
 	state = GameState{};
-	Init();
+
+	state.shopItems = 
+	{
+		{1, "name", "slot", 100, ItemType::CONSUME}
+	};
+
+	SceneManager::GetInst()->RegisterScene("TitleScene", std::make_unique<TitleScene>());
+	SceneManager::GetInst()->RegisterScene("InfoScene", std::make_unique<InfoScene>());
+	SceneManager::GetInst()->RegisterScene("ShopScene", std::make_unique<ShopScene>());
+	SceneManager::GetInst()->ChangeScene("TitleScene", state);
+	//Init();
 }
 
 void Update(GameState& state)
 {
 	SOUND->Update();
-	bool sceneChanged =
-		state.curScene != state.prevScene;
-
-	state.prevScene = state.curScene;
 	UpdateInput();
-	switch (state.curScene)
-	{
-	case Scene::TITLE:
-		if (sceneChanged)
-			InitTitle(state);
-		UpdateTitle(state);
-		break;
-	case Scene::INFO:
-		UpdateInfo(state);
-		break;
-	case Scene::INGAME:
-		break;
-	case Scene::SHOP:
-		break;
-	case Scene::GAMEOVER:
-		break;
-	default:
-		break;
-	}
+	SceneManager::GetInst()->Update(state);
 }
 
 void Render(const GameState& state)
 {
-	if (state.prevScene != state.curScene)
-		system("cls");
-
 	GotoXY(0, 0);
-	switch (state.curScene)
-	{
-	case Scene::TITLE:
-		RenderTitle(state);
-		break;
-	case Scene::INFO:
-		RenderInfo(state);
-		break;
-	case Scene::INGAME:
-		break;
-	case Scene::SHOP:
-		break;
-	case Scene::GAMEOVER:
-		break;
-	default:
-		break;
-	}
+	SceneManager::GetInst()->Render(state);
+}
+void Release()
+{
+	SOUND->Release();
+	SceneManager::DestroyInst();
+	
 }

@@ -1,8 +1,10 @@
 #pragma once
-class Scene
+#include "GameState.h"
+class AbstractScene
 {
 public:
-	virtual void Init() abstract;
-	virtual void Update() abstract;
-	virtual void Render() abstract;
+	virtual void Init(GameState& state) abstract;
+	virtual void Update(GameState& state) abstract;
+	virtual void Render(const GameState& state) abstract;
+	virtual void Release() {}
 };
