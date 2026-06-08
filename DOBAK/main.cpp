@@ -2,6 +2,7 @@
 #include <iostream>
 #include "GameState.h"
 #include "Game.h"
+#include "SoundManager.h"
 #include <string>
 int main()
 {
@@ -15,5 +16,5 @@ int main()
 		Render(state);
 		FrameSync(60);
 	}
-	
+	Release();
 }

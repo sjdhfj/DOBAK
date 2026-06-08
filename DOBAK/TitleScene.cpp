@@ -1,33 +1,32 @@
 ﻿#include "TitleScene.h"
-#include "Console.h"
-#include "UIAsciiObjs.h"
+
 static UIAsciiObjs objs;
-void InitTitle(GameState& state)
+void TitleScene::Init(GameState& state)
 {
 	AsciiInit(objs);
 }
-void UpdateTitle(GameState& state)
+void TitleScene::Update(GameState& state)
 {
 	AsciiUpdate(objs);
 	// 키입력 화살표 왔다갔다
 	if (GetKeyDown(VK_UP))
 	{
-		state.curMenu = (Menu)std::max((int)Menu::START, (int)state.curMenu - 1);
+		_curMenu = (Menu)std::max((int)Menu::START, (int)_curMenu - 1);
 	}
 	if (GetKeyDown(VK_DOWN))
 	{
-		state.curMenu = (Menu)std::min((int)Menu::QUIT, (int)state.curMenu + 1);
+		_curMenu = (Menu)std::min((int)Menu::QUIT, (int)_curMenu + 1);
 	}
-	if (GetKeyDown(VK_SPACE))
+	if (GetKeyDown(VK_RETURN))
 	{
-		switch (state.curMenu)
+		switch (_curMenu)
 		{
 		case Menu::START:
 			PlayTransition();
-			state.curScene = Scene::INGAME;
+			SceneManager::GetInst()->ChangeScene("ShopScene", state);
 			break;
 		case Menu::INFO:
-			state.curScene = Scene::INFO;
+			SceneManager::GetInst()->ChangeScene("InfoScene", state);
 			break;
 		case Menu::QUIT:
 			state.isRunning = false;
@@ -36,7 +35,7 @@ void UpdateTitle(GameState& state)
 	}
 }
 
-void RenderTitle(const GameState& state)
+void TitleScene::Render(const GameState& state)
 {
 	AsciiRender(objs);
 	// 그려줄겁니다.
@@ -48,16 +47,16 @@ void RenderTitle(const GameState& state)
 	for (int i = 0; i < 3; ++i)
 	{
 		GotoXY(x - 2, y + i);
-		cout << (i == (int)state.curMenu ? "> " : "  ") << labels[i];
+		cout << (i == (int)_curMenu ? "> " : "  ") << labels[i];
 	}
 	const wstring ascii[] =
 	{
-		L"██████╗  ██████╗ ███╗   ███╗██████╗     ███╗   ███╗ █████╗ ███╗   ██╗",
-		L"██╔══██╗██╔═══██╗████╗ ████║██╔══██╗    ████╗ ████║██╔══██╗████╗  ██║",
-		L"██████╔╝██║   ██║██╔████╔██║██████╔╝    ██╔████╔██║███████║██╔██╗ ██║",
-		L"██╔══██╗██║   ██║██║╚██╔╝██║██╔══██╗    ██║╚██╔╝██║██╔══██║██║╚██╗██║",
-		L"██████╔╝╚██████╔╝██║ ╚═╝ ██║██████╔╝    ██║ ╚═╝ ██║██║  ██║██║ ╚████║",
-		L"╚═════╝  ╚═════╝ ╚═╝     ╚═╝╚═════╝     ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝"
+		L"██████╗  ██████╗ ██████╗  █████╗ ██╗  ██╗",
+		L"██╔══██╗██╔═══██╗██╔══██╗██╔══██╗██║ ██╔╝",
+		L"██║  ██║██║   ██║██████╔╝███████║█████╔╝ ",
+		L"██║  ██║██║   ██║██╔══██╗██╔══██║██╔═██╗ ",
+		L"██████╔╝╚██████╔╝██████╔╝██║  ██║██║  ██╗",
+		L"╚═════╝  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝"
 	};
 	int titleX = (res.X - 70) / 2;
 	int titleY = res.Y / 3;
@@ -78,57 +77,24 @@ void RenderTitle(const GameState& state)
 	cout << "게임 종료";
 
 	GotoXY(x - 2, y);
-	cout << (state.curMenu == Menu::START ? ">" : " ");
+	cout << (_curMenu == Menu::START ? ">" : " ");
 	GotoXY(x - 2, y + 1);
-	cout << (state.curMenu == Menu::INFO ? ">" : " ");
+	cout << (_curMenu == Menu::INFO ? ">" : " ");
 	GotoXY(x - 2, y + 2);
-	cout << (state.curMenu == Menu::QUIT ? ">" : " ");*/
+	cout << (_curMenu == Menu::QUIT ? ">" : " ");*/
 }
 
-void UpdateInfo(GameState& state)
-{
-	if (GetKeyDown(VK_ESCAPE))
-		state.curScene = Scene::TITLE;
-}
-
-void RenderInfo(const GameState& state)
-{
-	// 화면 중앙에 출력
-	COORD res = GetConsoleResolution();
-	int cx = res.X / 2;
-	int cy = res.Y / 3;
-
-	const string infoLabels[] =
-	{
-		"[ 조작 방법 ]",
-		"방향키  : 이동",
-		"SPACE  : 폭탄 설치",
-		"Z      : 스킬",
-		"ESC 로 돌아가기"
-	};
-	for (int i = 0; i < 5; ++i)
-	{
-		GotoXY(cx - 6, cy + i);
-		if (i == 0)
-			SetColor(Color::LIGHT_YELLOW);
-		else if (i == 4)
-			SetColor(Color::LIGHT_GRAY);
-		else
-			SetColor();
-		cout << infoLabels[i];
-	}
-}
-
-void PlayTransition()
+void TitleScene::PlayTransition()
 {
 	COORD res = GetConsoleResolution();
 	int delayMs = 20;
 	int flashCount = 5;
 	FlashAnimation(res, flashCount, delayMs);
 	CrossAnimation(res, delayMs);
+	system("cls");
 }
 
-void FlashAnimation(COORD resolution, int count, int delayMs)
+void TitleScene::FlashAnimation(COORD resolution, int count, int delayMs)
 {
 	for (int i = 0; i < count; ++i)
 	{
@@ -142,22 +108,87 @@ void FlashAnimation(COORD resolution, int count, int delayMs)
 	}
 }
 
-void CrossAnimation(COORD resolution, int delayMs)
+void TitleScene::CrossAnimation(COORD resolution, int delayMs)
 {
-	SetColor(Color::BLACK, Color::WHITE);
-	for (int x = 0; x < resolution.X / 2; ++x)
+	system("cls");
+
+	int totalSteps = 300;
+	float prevAngle = 0.0f;
+	float pi = 2.0f * 3.1415926535897932f;
+
+	for (int i = 1; i <= totalSteps; ++i)
 	{
-		for (int y = 0; y < resolution.Y; y += 2)
-		{
-			GotoXY(x * 2, y);
-			cout << "  ";
-		}
-		for (int y = 1; y < resolution.Y; y += 2)
-		{
-			GotoXY(resolution.X - 2 - x * 2, y);
-			cout << "  ";
-		}
-		Sleep(delayMs);
+		float targetAngle = (float)i / totalSteps * pi;
+		Circle(prevAngle, targetAngle, "a");
+		prevAngle = targetAngle;
 	}
-	SetColor();
+}
+void TitleScene::Circle(float prevAngle, float targetAngle, const string& fillChar)
+{
+	COORD res = GetConsoleResolution();
+	int width = res.X;
+	int height = res.Y;
+
+	float centerX = width / 2.0f;
+	float centerY = height / 2.0f;
+	float bojung = 2.0f;
+	float pibojung = 2.0f * 3.1415926535897932f;
+	int colorCnt = (int)Color::END;
+
+	for (int y = 0; y < height; ++y)
+	{
+		int start = -1;
+		Color color = Color::BLACK;
+
+		for (int x = 0; x < width; ++x)
+		{
+			float dx = (x - centerX) * bojung;
+			float dy = y - centerY;
+			float angle = atan2f(dx, -dy);
+			if (angle < 0) angle += pibojung;
+
+			bool inPrev = (angle <= prevAngle);
+			bool inTarget = (angle <= targetAngle);
+
+			if (inTarget && !inPrev)
+			{
+				float angleRatio = angle / pibojung;
+				int colorIndex = (int)(angleRatio * colorCnt);
+				if (colorIndex < 0) colorIndex = 0;
+				if (colorIndex >= colorCnt) colorIndex = colorCnt - 1;				
+				Color c = (Color)colorIndex;
+
+				if (start < 0)
+				{
+					start = x;
+					color = c;
+				}
+				else if (c != color)
+				{
+					GotoXY(start, y);
+					SetColor(color, color);
+					for (int rx = start; rx < x; ++rx) cout << fillChar;
+					start = x;
+					color = c;
+				}
+			}
+			else
+			{
+				if (start >= 0)
+				{
+					GotoXY(start, y);
+					SetColor(color, color);
+					for (int rx = start; rx < x; ++rx) cout << fillChar;
+					start = -1;
+				}
+			}
+		}
+		if (start >= 0)
+		{
+			GotoXY(start, y);
+			SetColor(color, color);
+			for (int rx = start; rx < width; ++rx) cout << fillChar;
+		}
+	}
+	SetColor(Color::WHITE, Color::BLACK);
 }
