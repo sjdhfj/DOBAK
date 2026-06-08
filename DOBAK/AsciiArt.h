@@ -4,10 +4,13 @@
 #include<algorithm>
 using std::vector;
 using std::string;
+using std::wstring;
 
 struct AsciiObjs
 {
 	vector<string> slotMachine;
+	vector<wstring> six;
+	vector<wstring> seven;
 };
 
 void AsciiInit(AsciiObjs& objs);
