@@ -11,6 +11,7 @@ int** slotArr = new int* [height];
 
 void Init()
 {
+	srand((unsigned int)time(nullptr));
 
 	COORD res = GetConsoleResolution();
 	int x = res.X / 2 - 4;
@@ -79,5 +80,22 @@ void RandomSlot(int x, int y)
 		Sleep(10);
 	}
 
-
+	for (int i = 0; i < height; ++i)
+	{
+		for (int j = 0; j < width; ++j)
+		{
+			if (slotArr[i][j] == 7)
+			{
+				GotoXY(x + j - 1, y + i);
+				SetColor(Color::WHITE, Color::YELLOW);
+				cout << 7;
+			}
+			else if (slotArr[i][j] == 6)
+			{
+				GotoXY(x + j - 1, y + i);
+				SetColor(Color::WHITE, Color::YELLOW);
+				cout << 6;
+			}
+		}
+	}
 }
