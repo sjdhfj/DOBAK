@@ -23,7 +23,7 @@ void TitleScene::Update(GameState& state)
 		{
 		case Menu::START:
 			PlayTransition();
-			SceneManager::GetInst()->ChangeScene("ShopScene", state);
+			SceneManager::GetInst()->ChangeScene("InGameScene", state);
 			break;
 		case Menu::INFO:
 			SceneManager::GetInst()->ChangeScene("InfoScene", state);

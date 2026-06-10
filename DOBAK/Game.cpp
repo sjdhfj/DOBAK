@@ -26,6 +26,7 @@ void Init(GameState& state)
 	SceneManager::GetInst()->RegisterScene("TitleScene", std::make_unique<TitleScene>());
 	SceneManager::GetInst()->RegisterScene("InfoScene", std::make_unique<InfoScene>());
 	SceneManager::GetInst()->RegisterScene("ShopScene", std::make_unique<ShopScene>());
+	SceneManager::GetInst()->RegisterScene("InGameScene", std::make_unique<InGameScene>());
 	SceneManager::GetInst()->ChangeScene("TitleScene", state);
 	//Init();
 }

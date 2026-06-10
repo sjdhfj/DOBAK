@@ -1,5 +1,6 @@
 ﻿#include "SlotMachineScene.h"
 #include "Console.h"
+#include "AsciiArt.h"
 
 //int main()
 //{
@@ -8,37 +9,28 @@
 
 int width = 5, height = 3;
 int** slotArr = new int* [height];
+int slotX = 0, slotY = 0;
 
-void Init()
+int coin = 0;
+AsciiObjs asciiArts;
+
+void InGameScene::Init(GameState& state)
 {
+	AsciiInit(asciiArts);
+	srand((unsigned int)time(nullptr));
 
 	COORD res = GetConsoleResolution();
 	int x = res.X / 2 - 4;
 	int y = res.Y / 3 * 2;
-	const wstring ascii[] =
-	{
-		L"   +-------------+   ",
-		L"   |.-----------.|   ",
-		L"   ||           ||   ",
-		L"   ||           ||   ",
-		L"   ||           ||   ",
-		L"   |+-----------+|   ",
-		L"   +-..-------..-+   ",
-		L"   .-------------.   ",
-		L"  / /===========\\ \\  ",
-		L" / /=============\\ \\ ",
-		L"/___________________\\",
-		L"\\___________________/ ",
 
 
-	};
-	int titleX = (res.X - 50) / 2;
+	int titleX = (res.X -60) / 2;
 	int titleY = res.Y / 4;
 	SetUniCodeMode();
 	for (int i = 0; i < 12; ++i)
 	{
 		GotoXY(titleX, titleY + i);
-		wcout << ascii[i];
+		cout << asciiArts.slotMachine[i];
 	}
 	SetDefaultMode();
 
@@ -48,25 +40,42 @@ void Init()
 		slotArr[i] = new int[width];
 	}
 
-	RandomSlot(titleX + 6,titleY + 2);
-
-	while (true)
+	slotX = titleX + 6, slotY = titleY + 2;
+	
+	GotoXY(slotX, slotY);
+	for (int i = 0; i < height; ++i)
 	{
-		Render();
+		for (int j = 0; j < width; ++j)
+		{
+			slotArr[i][j] = 0;
+			cout << slotArr[i][j] << " ";
+		}
+		GotoXY(slotX, slotY + i + 1);
+	}
+
+	SixSeven();
+}
+void InGameScene::Update(GameState& state)
+{
+	if (GetKeyDown(VK_SPACE))
+	{
+		RandomSlot();
 	}
 }
-
-void Render()
+void InGameScene::Render(const GameState& state)
 {
-	//system("cls");
 	GotoXY(0, 0);
+	std::setw(30);
+	cout << "                    ";
+	GotoXY(0, 0);
+	cout << "Coin:" << coin;
 }
 
-void RandomSlot(int x, int y)
+void InGameScene::RandomSlot()
 {
 	for (int w = 0; w < 150; ++w)
 	{
-		GotoXY(x, y);
+		GotoXY(slotX, slotY);
 		for (int i = 0; i < height; ++i)
 		{
 			for (int j = 0; j < width; ++j)
@@ -74,10 +83,81 @@ void RandomSlot(int x, int y)
 				slotArr[i][j] = rand() % 7 + 1;
 				cout << slotArr[i][j] << " ";
 			}
-			GotoXY(x, y + i + 1);
+			GotoXY(slotX, slotY + i + 1);
 		}
 		Sleep(10);
 	}
+	
+	int addCoin = 0;
 
+	for (int w = 0; w < 5; ++w)
+	{
+		for (int i = 0; i < height; ++i)
+		{
+			for (int j = 0; j < width; ++j)
+			{
+				if (slotArr[i][j] == 7 || slotArr[i][j] == 6)
+				{
+					GotoXY(slotX + j * 2, slotY + i);
+					SetColor();
+					cout << slotArr[i][j];
+				}
+				else if (slotArr[i][j] == 1)
+				{
+					GotoXY(slotX + j * 2, slotY + i);
+					SetColor();
+					cout << slotArr[i][j];
+				}
+			}
+		}
+		Sleep(100);
+		for (int i = 0; i < height; ++i)
+		{
+			for (int j = 0; j < width; ++j)
+			{
+				if (slotArr[i][j] == 7 || slotArr[i][j] == 6)
+				{
+					GotoXY(slotX + j * 2, slotY + i);
+					SetColor(Color::WHITE, Color::YELLOW);
+					cout << slotArr[i][j];
 
+					addCoin++;
+				}
+				else if (slotArr[i][j] == 1)
+				{
+					GotoXY(slotX + j * 2, slotY + i);
+					SetColor(Color::WHITE, Color::RED);
+					cout << slotArr[i][j];
+
+					addCoin--;
+				}
+			}
+		}
+		Sleep(100);
+		coin += addCoin;
+		SetColor();
+	}
+}
+
+void InGameScene::SixSeven()
+{
+	/*int x = res.X / 2 - 4;
+	int y = res.Y / 3 * 2;
+
+	int titleX = (res.X - 60) / 2;
+	int titleY = res.Y / 4;*/
+
+	SetUniCodeMode();
+	for (int i = 0; i < 27; ++i)
+	{
+		GotoXY(20, 10 + i);
+		wcout << asciiArts.six[i];
+	}
+
+	for (int i = 0; i < 22; ++i)
+	{
+		GotoXY(40, 10 + i);
+		wcout << asciiArts.seven[i];
+	}
+	SetDefaultMode();
 }
