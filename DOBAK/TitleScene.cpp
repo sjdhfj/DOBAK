@@ -121,6 +121,7 @@ void TitleScene::CrossAnimation(COORD resolution, int delayMs)
 		float targetAngle = (float)i / totalSteps * pi;
 		Circle(prevAngle, targetAngle, "a");
 		prevAngle = targetAngle;
+		Sleep(0.5f);
 	}
 }
 void TitleScene::Circle(float prevAngle, float targetAngle, const string& fillChar)
@@ -137,12 +138,12 @@ void TitleScene::Circle(float prevAngle, float targetAngle, const string& fillCh
 
 	for (int y = 0; y < height; ++y)
 	{
-		int start = -1;
+		int startX = -1;
 		Color color = Color::BLACK;
 
 		for (int x = 0; x < width; ++x)
 		{
-			float dx = (x - centerX) * bojung;
+			float dx = (x - centerX) * bojung; //현제 픽셀에서 중심점까지의 거리
 			float dy = y - centerY;
 			float angle = atan2f(dx, -dy);
 			if (angle < 0) angle += pibojung;
@@ -150,7 +151,7 @@ void TitleScene::Circle(float prevAngle, float targetAngle, const string& fillCh
 			bool inPrev = (angle <= prevAngle);
 			bool inTarget = (angle <= targetAngle);
 
-			if (inTarget && !inPrev)
+			if (inTarget && !inPrev) //이번 프레임에 새로 그려야 될거
 			{
 				float angleRatio = angle / pibojung;
 				int colorIndex = (int)(angleRatio * colorCnt);
@@ -158,36 +159,36 @@ void TitleScene::Circle(float prevAngle, float targetAngle, const string& fillCh
 				if (colorIndex >= colorCnt) colorIndex = colorCnt - 1;				
 				Color c = (Color)colorIndex;
 
-				if (start < 0)
+				if (startX < 0) //시작점이 없으면
 				{
-					start = x;
+					startX = x; //현재의 X값을 시작점으로 기억한다.
 					color = c;
 				}
-				else if (c != color)
+				else if (c != color) //색이 바뀔때
 				{
-					GotoXY(start, y);
+					GotoXY(startX, y);
 					SetColor(color, color);
-					for (int rx = start; rx < x; ++rx) cout << fillChar;
-					start = x;
+					for (int rx = startX; rx < x; ++rx) cout << fillChar;
+					startX = x;
 					color = c;
 				}
 			}
 			else
 			{
-				if (start >= 0)
+				if (startX >= 0)
 				{
-					GotoXY(start, y);
+					GotoXY(startX, y);
 					SetColor(color, color);
-					for (int rx = start; rx < x; ++rx) cout << fillChar;
-					start = -1;
+					for (int rx = startX; rx < x; ++rx) cout << fillChar;
+					startX = -1;
 				}
 			}
 		}
-		if (start >= 0)
+		if (startX >= 0)
 		{
-			GotoXY(start, y);
+			GotoXY(startX, y);
 			SetColor(color, color);
-			for (int rx = start; rx < width; ++rx) cout << fillChar;
+			for (int rx = startX; rx < width; ++rx) cout << fillChar;
 		}
 	}
 	SetColor(Color::WHITE, Color::BLACK);

@@ -6,8 +6,8 @@ using std::vector;
 using std::string;
 struct UIAsciiObjs
 {
-	vector<string> title;
-
+	vector<string> six;
+	vector<string> seven;
 };
 void AsciiInit(UIAsciiObjs& objs);
 void AsciiUpdate(UIAsciiObjs& objs);
