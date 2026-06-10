@@ -4,60 +4,75 @@
 #include "UIAsciiObjs.h"
 void AsciiInit(UIAsciiObjs& objs)
 {
-    /*objs.plane =
+    objs.six =
     {
-       "        _        ",
-       "      -= \`\     ",
-       "  | \ ____\_\__  ",
-       "-= \c`""""""" "`)",
-       "   `~~~~~/ /~~`  ",
-       "     -= = / /    ",
-       "       '-'       "
+        "            @@@@,       ",
+        "          :@@ ~@@       ",
+        "         ~@@   @@       ",
+        "         @@-  @@@       ",
+        "        ;@@             ",
+        "        @@@             ",
+        "        @@$@@@$         ",
+        "       -@@@=-@@@:       ",
+        "       @@@@  .@@@       ",
+        "       @@@:   @@@       ",
+        "       @@@~   @@@       ",
+        "       !@@:  .@@@       ",
+        "        @@!  @@@,       ",
+        "        @@@  @@@        ",
+        "         @@@@@$         "
     };
-
-    objs.cloud =
+    objs.seven =
     {
-     "      _  _       ",
-     "    ( `   )_     ",
-     "   (    )    `)  ",
-     " (_   (_ .  _) _)"
+        "                       ",
+        "       @@@@@@@@@       ",
+        "       @@~...:@=       ",
+        "        @     @@       ",
+        "             @@*       ",
+        "          =@@          ",
+        "          @@@          ",
+        "         @@@           ",
+        "        -@@            ",
+        "        @@@            ",
+        "       .@@-            ",
+        "        @@@.           ",
+        "        @@@            ",
+        "         @@-           ",
+        "                       "
     };
-    for (string& line : objs.plane)
+    for (string& line : objs.six)
         line.resize(WIDTH, ' ');
-    for (string& line : objs.cloud)
-        line.resize(WIDTH, ' ');*/
+    for (string& line : objs.seven)
+        line.resize(WIDTH, ' ');
 }
 
 void AsciiUpdate(UIAsciiObjs& objs)
 {
-    //밀어줄거고
-    /*for (string& line : objs.cloud)
+    for (string& line : objs.six)
         std::rotate(line.begin(), line.begin() + 1, line.end());
-    for (string& line : objs.plane)
-        std::rotate(line.rbegin(), line.rbegin() + 1, line.rend());*/
-    //A B C D E
-    // B C D E A
+    for (string& line : objs.seven)
+        std::rotate(line.rbegin(), line.rbegin() + 1, line.rend());
 }
 
 void AsciiRender(const UIAsciiObjs& objs)
 {
-    ////그려줄거야.
-    //int planeLines = (int)objs.plane.size();
-    //int cloudLines = (int)objs.cloud.size();
-    //COORD res = GetConsoleResolution();
+    //그려줄거야.
+    int six = (int)objs.six.size();
+    int seven = (int)objs.seven.size();
+    COORD res = GetConsoleResolution();
 
-    //SetColor(Color::LIGHT_YELLOW);
-    //for (int i = 0; i < planeLines; ++i)
-    //{
-    //    GotoXY(0, i);
-    //    cout << objs.plane[i];
-    //}
+    SetColor(Color::LIGHT_YELLOW);
+    for (int i = 0; i < six; ++i)
+    {
+        GotoXY(0, i);
+        cout << objs.six[i];
+    }
 
-    //SetColor(Color::CYAN);
-    //for (int i = 0; i < cloudLines; ++i)
-    //{
-    //    GotoXY(0, planeLines + i);
-    //    cout << objs.cloud[i];
-    //}
-    //SetColor();
+    SetColor(Color::CYAN);
+    for (int i = 0; i < seven; ++i)
+    {
+        GotoXY(0, seven + i );
+        cout << objs.seven[i];
+    }
+    SetColor();
 }
