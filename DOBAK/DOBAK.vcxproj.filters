@@ -72,6 +72,9 @@
     <ClCompile Include="SceneManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Pattern.cpp">
+      <Filter>KYM\CPP</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SoundManager.h">
@@ -121,6 +124,9 @@
     </ClInclude>
     <ClInclude Include="SceneManager.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Pattern.h">
+      <Filter>KYM\Header</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

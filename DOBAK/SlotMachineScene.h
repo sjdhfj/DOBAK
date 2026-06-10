@@ -8,5 +8,8 @@ class InGameScene : public AbstractScene
 	void Update(GameState& state);
 	void Render(const GameState& state);
 	void RandomSlot();
-	void SixSeven();
+	void DrawUI();
+	void DrawSlotMachine();
+	void DrawSlotNumbers();
+	void DrawSixSeven();
 };
