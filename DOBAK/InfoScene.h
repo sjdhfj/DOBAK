@@ -8,5 +8,3 @@ public:
 	void Update(GameState& state) override;
 	void Render(const GameState& state) override;
 };
-
-

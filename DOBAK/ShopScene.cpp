@@ -34,6 +34,7 @@ void ShopScene::Init(GameState& state)
         { 6767, "676767676767", "676767", 6767 * 2, ItemType::EQUIP },
         { 67, "67676767", "676767",  67 * 2, ItemType::EQUIP },
     };
+    PlayOpenTransition(state);
 }
 
 void ShopScene::Update(GameState& state)
@@ -92,7 +93,10 @@ void ShopScene::Update(GameState& state)
     }
 
     if (GetKeyDown(VK_ESCAPE))
+    {
+        PlayCloseTransition(state);
         SceneManager::GetInst()->ChangeScene("TitleScene", state);
+    }
     if (_isSmiling && state.curTime - _smileTimer > 1000)
         _isSmiling = false;
     if (_isSelling && state.curTime - _juiceTimer > 1000)
@@ -102,6 +106,7 @@ void ShopScene::Update(GameState& state)
 
 void ShopScene::Render(const GameState& state)
 {
+    SetColor();
     auto noConststate = state;
     const auto& list = CurList(noConststate);
 
@@ -275,4 +280,78 @@ void ShopScene::Render(const GameState& state)
             SetColor();
             cout << i;
     }
+}
+
+void ShopScene::PlayOpenTransition(const GameState& state)
+{
+    COORD res = GetConsoleResolution();
+    int W = res.X;
+    int H = res.Y;
+    int half = W / 2;
+    int delayMs = 3;
+    int colorCount = (int)Color::END;
+
+    for (int row = 0; row < H; ++row)
+    {
+        Color c = (Color)std::min((int)(((float)row / H) * colorCount), colorCount - 1);
+        SetColor(c, c);
+        GotoXY(0, row);
+        for (int x = 0; x < W; ++x)
+            cout << " ";
+        Sleep(4);
+    }
+    SetColor();
+    for (int x = 0; x < W; ++x)
+    {
+        int cx = (x < half) ? x : (W - 1 - x);
+        Color c = (Color)std::min((int)(((float)cx / half) * colorCount), colorCount - 1);
+        SetColor(c, c);
+        for (int y = 0; y < H; ++y)
+        {
+            GotoXY(x, y);
+            cout << " ";
+        }
+    }
+    for (int step = 0; step < half; ++step)
+    {
+        int leftX = half - 1 - step; 
+        int rightX = half + step;    
+
+        for (int y = 0; y < H; ++y)
+        {
+            GotoXY(leftX, y);
+            cout << " ";
+            GotoXY(rightX, y);
+            cout << " ";
+        }
+        Sleep(delayMs);
+    }
+    SetColor();
+    Render(state);
+}
+
+void ShopScene::PlayCloseTransition(const GameState& state)
+{
+    COORD res = GetConsoleResolution();
+    int W = res.X;
+    int H = res.Y;
+    int half = W / 2;
+    int delayMs = 3;
+    int colorCount = (int)Color::END;
+
+    for (int step = 1; step <= half; ++step)
+    {
+        Color c = (Color)std::min((int)(((float)step / half) * colorCount), colorCount - 1);
+        SetColor(c, c);
+
+        for (int y = 0; y < H; ++y)
+        {
+            GotoXY(step - 1, y);
+            cout << " ";
+            GotoXY(W - step, y);
+            cout << " ";
+        }
+        Sleep(delayMs);
+    }
+    SetColor();
 }

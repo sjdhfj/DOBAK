@@ -10,6 +10,9 @@ public:
 	void Update(GameState& state) override;
 	void Render(const GameState& state) override;
 private:
+    void PlayOpenTransition(const GameState& state);
+    void PlayCloseTransition(const GameState& state);
+private:
     ShopTab _curTab = ShopTab::BUY;
     int _cursor = 0;
     std::vector<Item> _shopItems;
