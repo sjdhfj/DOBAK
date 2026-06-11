@@ -10,8 +10,9 @@ public:
 	void Update(GameState& state) override;
 	void Render(const GameState& state) override;
 private:
-    void PlayOpenTransition(const GameState& state);
-    void PlayCloseTransition(const GameState& state);
+    void PlayOpenTransition(const GameState& state, float delaymilisecond);
+    void PlayCloseTransition(const GameState& state, float delayMilisecond);
+    void RenderSixSeven(const GameState& state);
 private:
     ShopTab _curTab = ShopTab::BUY;
     int _cursor = 0;
@@ -23,4 +24,6 @@ private:
     bool _isSelling = false;
     ULONGLONG _smileTimer = 0;
     ULONGLONG _juiceTimer = 0;
+    ULONGLONG _sixSevenTimer = 1000;
+    int _prevArtOffset = 99;
 };

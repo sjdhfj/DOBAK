@@ -14,7 +14,7 @@ void Init(GameState& state)
 	SOUND->Init();
 	srand((unsigned int)time(nullptr));
 	SetConsoleSize(WIDTH, HEIGHT);
-	SetCursorVisible(false);
+	SetCursorVisible(true);
 	SetConsoleMouseInputDisable();
 	state = GameState{};
 

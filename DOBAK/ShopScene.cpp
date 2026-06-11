@@ -1,11 +1,13 @@
-#include "ShopScene.h"
+ï»¿#include "ShopScene.h"
 #include <vector>
+#include "UIAsciiObjs.h"
 constexpr int ShopX = 10;
 constexpr int ShopY = 3;
 constexpr int ListY = ShopY + 6;
 constexpr int ListMax = 6;
 constexpr float SellPricePercent = 0.5f;
 constexpr int ArtX = 55;
+static UIAsciiObjs objs;
 std::vector<Item>& ShopScene::CurList(GameState& state)
 {
     return (_curTab == ShopTab::BUY) ? _shopItems : state.player.inventory;
@@ -23,6 +25,7 @@ int ShopScene::CurPrice(const Item& item) const
 
 void ShopScene::Init(GameState& state)
 {
+    AsciiInit(objs);
     _curTab = ShopTab::BUY;
     _cursor = 0;
     state.player.gold = 500;
@@ -34,7 +37,7 @@ void ShopScene::Init(GameState& state)
         { 6767, "676767676767", "676767", 6767 * 2, ItemType::EQUIP },
         { 67, "67676767", "676767",  67 * 2, ItemType::EQUIP },
     };
-    PlayOpenTransition(state);
+    PlayOpenTransition(state, 0.01f);
 }
 
 void ShopScene::Update(GameState& state)
@@ -94,14 +97,19 @@ void ShopScene::Update(GameState& state)
 
     if (GetKeyDown(VK_ESCAPE))
     {
-        PlayCloseTransition(state);
+        PlayCloseTransition(state, 0.01f);
         SceneManager::GetInst()->ChangeScene("TitleScene", state);
     }
     if (_isSmiling && state.curTime - _smileTimer > 1000)
         _isSmiling = false;
     if (_isSelling && state.curTime - _juiceTimer > 1000)
         _isSelling = false;
-
+    if (state.curTime - _sixSevenTimer > 100)
+    {
+        std::rotate(objs.shopSix.begin(), objs.shopSix.begin() + 1, objs.shopSix.end());
+        std::rotate(objs.shopSeven.rbegin(), objs.shopSeven.rbegin() + 1, objs.shopSeven.rend());
+        _sixSevenTimer = state.curTime;
+    }
 }
 
 void ShopScene::Render(const GameState& state)
@@ -112,14 +120,14 @@ void ShopScene::Render(const GameState& state)
 
     GotoXY(ShopX, ShopY);
     SetColor(Color::LIGHT_YELLOW);
-    cout << "»óÁ¡";
+    cout << "ìƒì ";
 
     GotoXY(ShopX, ShopY + 2);
     SetColor(_curTab == ShopTab::BUY ? Color::WHITE : Color::GRAY);
-    cout << (_curTab == ShopTab::BUY ? "> " : "  ") << "»ç±â";
+    cout << (_curTab == ShopTab::BUY ? "> " : "  ") << "ì‚¬ê¸°";
     cout << "    ";
     SetColor(_curTab == ShopTab::SELL ? Color::WHITE : Color::GRAY);
-    cout << (_curTab == ShopTab::SELL ? "> " : "  ") << "ÆÈ±â";
+    cout << (_curTab == ShopTab::SELL ? "> " : "  ") << "íŒ”ê¸°";
 
     GotoXY(ShopX, ShopY + 4);
     SetColor();
@@ -159,136 +167,56 @@ void ShopScene::Render(const GameState& state)
     cout << "Gold: " << std::left << std::setw(10) << state.player.gold << "G";
 
     SetColor();
-
-    const std::vector<string> noSmileman =
-    {
-        R"(         ////^\\\\               )",
-        R"(         | _   _ |               )",
-        R"(        @ (o) (o) @              )",
-        R"(         |   <   |               )",
-        R"(         |  ___  |               )",
-        R"(          \_____/                )",
-        R"(        ____|  |____             )",
-        R"(       /    \__/    \            )",
-        R"(      /              \           )",
-        R"(     /\_/|        |\_/\          )",
-        R"(    / /  |        |  \ \         )",
-        R"(   ( <   |        |   > )        )",
-        R"(    \ \  |        |  / /         )",
-        R"(     \ \ |________| / /          )",
-        R"(      \ \|<I_D_I__|/ /           )",
-        R"(       \ \ / I  \ / /            )",
-        R"(        \ /  I   \ /             )",
-        R"(         |        |              )",
-        R"(         |   |    |              )",
-        R"(         |   |    |              )",
-        R"(         |   |    |              )",
-        R"(         |   |    |              )",
-        R"(         |## | ## |              )",
-        R"(         |   |    |              )",
-        R"(         |   |    |              )",
-        R"(         |___|____|              )",
-        R"(         (___(____)              )",
-        R"(         _| | _| |               )",
-        R"(     cccC__Cccc___)              )"
-    };
-    const std::vector<string> Smileman =
-    {
-        R"( Ccc      ////^\\\\       Ccc    )",
-        R"(c( )D     | ^   ^ |      C()D    )",
-        R"( \  \    @ (O) (O) @     /  /    )",
-        R"(  \  \    |   <   |     /  /     )",
-        R"(   \  \   |  \_/  |    /  /      )",
-        R"(    \  \   \_____/    /  /       )",
-        R"(     \  \____|  |____/  /        )",
-        R"(      \ /    \__/    \ /         )",
-        R"(       \__          __/          )",
-        R"(          |        |             )",
-        R"(          |        |             )",
-        R"(          |        |             )",
-        R"(          |        |             )",
-        R"(          |________|             )",
-        R"(          |_I_D_I__|             )",
-        R"(          | / I  \ |             )",
-        R"(          |/  I   \|             )",
-        R"(          |        |             )",
-        R"(          |   |    |             )",
-        R"(          |   |    |             )",
-        R"(          |   |    |             )",
-        R"(          |   |    |             )",
-        R"(          |## | ## |             )",
-        R"(          |   |    |             )",
-        R"(          |   |    |             )",
-        R"(          |___|____|             )",
-        R"(         (____(____)             )",
-        R"(          _| | _| |              )",
-        R"(      cccC__Cccc___)             )"
-    };
-    
-    const std::vector<string> juiceMan =
-    {
-        R"(          ////^\\\\              )",
-        R"(          | ^   ^ |              )",
-        R"(         @ (O) (O) @             )",
-        R"(          |   <   |              )",
-        R"(          |  \_/  |          \__ )",
-        R"(           \_____/           |\ |)",
-        R"(         ____|  |____        | \|)",
-        R"(        /    \__/    \      /|__|)",
-        R"(       /              \    / /   )",
-        R"(      /__/|        |\__\  / /    )",
-        R"(     /  / |        | \  \/ /     )",
-        R"(    (  (  |        |  \   /      )",
-        R"(     \  \ |        |   \_/       )",
-        R"(      \  \|________|             )",
-        R"(       \__|_I_D_I__|             )",
-        R"(          | / I  \ |             )",
-        R"(          |/  I   \|             )",
-        R"(          |   |    |             )",
-        R"(          |   |    |             )",
-        R"(          |___|____|             )",
-        R"(          (___(____)             )",
-        R"(           | |  | |              )",
-        R"(           | |  | |              )",
-        R"(           ( |  ( |              )",
-        R"(           | |  | |              )",
-        R"(           | |  | |              )",
-        R"(           | |  | |              )",
-        R"(          _| | _| |              )",
-        R"(      cccC__Cccc___)             )"
-    };
     
     int y = 1;
-    const auto& man = _isSelling ? juiceMan : (_isSmiling ? Smileman : noSmileman);
+    const auto& man = _isSelling ? objs.shopjuicemen : (_isSmiling ? objs.shophappymen : objs.shopmen);
     SetColor();
     for (auto& i : man)
     {
         GotoXY(ArtX, y++);
-        /*if (y == 1)
-        {
-            SetColor(Color::YELLOW);
-            cout << i;
-        }
-        else if (y >= 7 || y <= 14)
-        {
-            SetColor(Color::BLUE);
-            cout << i;
-        }
-        else
-        {
-        }*/
-            SetColor();
-            cout << i;
+        SetColor();
+        cout << i;
     }
+    //SetUniCodeMode();
+    RenderSixSeven(state);
 }
+void ShopScene::RenderSixSeven(const GameState& state)
+{
+    COORD res = GetConsoleResolution();
+    int x = res.X / 2 + 35;
 
-void ShopScene::PlayOpenTransition(const GameState& state)
+    int sixWidth = 0;
+    for (auto& i : objs.shopSix)
+        sixWidth = std::max(sixWidth, (int)i.size());
+    int sevenWidth = 0;
+    for (auto& i : objs.shopSeven)
+        sevenWidth = std::max(sevenWidth, (int)i.size());
+
+    SetUniCodeMode();
+
+    int y = 1;
+    for (auto& i : objs.shopSix)
+    {
+        if (IsGotoXY(x, y++))
+            wcout << i;
+    }
+
+    y = 1;
+    for (auto& i : objs.shopSeven)
+    {
+        if (IsGotoXY(x + sixWidth, y++))
+            wcout << i;
+    }
+
+    SetDefaultMode();
+}
+void ShopScene::PlayOpenTransition(const GameState& state, float delaymilisecond)
 {
     COORD res = GetConsoleResolution();
     int W = res.X;
     int H = res.Y;
     int half = W / 2;
-    int delayMs = 3;
+    float delayMs = delaymilisecond;
     int colorCount = (int)Color::END;
 
     for (int row = 0; row < H; ++row)
@@ -298,7 +226,7 @@ void ShopScene::PlayOpenTransition(const GameState& state)
         GotoXY(0, row);
         for (int x = 0; x < W; ++x)
             cout << " ";
-        Sleep(4);
+        Sleep(delayMs);
     }
     SetColor();
     for (int x = 0; x < W; ++x)
@@ -330,13 +258,13 @@ void ShopScene::PlayOpenTransition(const GameState& state)
     Render(state);
 }
 
-void ShopScene::PlayCloseTransition(const GameState& state)
+void ShopScene::PlayCloseTransition(const GameState& state, float delayMilisecond)
 {
     COORD res = GetConsoleResolution();
     int W = res.X;
     int H = res.Y;
     int half = W / 2;
-    int delayMs = 3;
+    float delayMs = delayMilisecond;
     int colorCount = (int)Color::END;
 
     for (int step = 1; step <= half; ++step)
