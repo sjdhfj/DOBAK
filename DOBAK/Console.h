@@ -27,6 +27,7 @@ void SetConsoleFullScreen();
 void SetConsoleWindowStyle(bool showTitleBar);
 
 void ShakeConsoleWindow(int intensity, int duration, int interval);
+void UpdateShakeConsoleWindow();
 
 void GotoXY(int x, int y);
 BOOL IsGotoXY(int x, int y);

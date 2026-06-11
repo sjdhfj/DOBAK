@@ -132,6 +132,7 @@
     <ClCompile Include="InfoScene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="AsciiArt.cpp" />
+    <ClCompile Include="Pattern.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="ShopScene.cpp" />
     <ClCompile Include="SlotMachineScene.cpp" />
@@ -149,6 +150,7 @@
     <ClInclude Include="GameState.h" />
     <ClInclude Include="InfoScene.h" />
     <ClInclude Include="Item.h" />
+    <ClInclude Include="Pattern.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="ShopScene.h" />

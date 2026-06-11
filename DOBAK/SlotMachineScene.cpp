@@ -7,6 +7,13 @@
 //	Init();
 //}
 
+//슬롯머신 관련
+SlotMachineState slotState;
+ULONGLONG lastSlotUpdateTime;
+ULONGLONG lastSlotStartTime;
+ULONGLONG lastSlotBlinkTime;
+int blinkCount = 0;
+bool isBlink = false;
 int width = 5, height = 3;
 int** slotArr = new int* [height];
 int slotX = 0, slotY = 0;
@@ -14,150 +21,209 @@ int slotX = 0, slotY = 0;
 int coin = 0;
 AsciiObjs asciiArts;
 
+int titleX;
+int titleY;
+
+//67 관련
+int bonusY = 2;
+ULONGLONG lastSixSevenMoveTime;
+int sixSevenCount = 0;
+bool isSixSeven = false;
+
+int sixWidthBoundary;
+int sixHeightBoundary;
+int sevenWidthBoundary;
+int sevenHeightBoundary;
+
+
 void InGameScene::Init(GameState& state)
 {
+	slotState = SlotMachineState::Idle;
 	AsciiInit(asciiArts);
 	srand((unsigned int)time(nullptr));
 
 	COORD res = GetConsoleResolution();
-	int x = res.X / 2 - 4;
-	int y = res.Y / 3 * 2;
 
-
-	int titleX = (res.X -60) / 2;
-	int titleY = res.Y / 4;
-	SetUniCodeMode();
-	for (int i = 0; i < 12; ++i)
-	{
-		GotoXY(titleX, titleY + i);
-		cout << asciiArts.slotMachine[i];
-	}
-	SetDefaultMode();
+	titleX = (res.X - 25) / 2;
+	titleY = res.Y / 4;
 
 	SetConsoleFont(L"NSimSun", { 20,25 }, FW_BOLD);
+
 	for (int i = 0; i < height; ++i)
 	{
 		slotArr[i] = new int[width];
 	}
 
-	slotX = titleX + 6, slotY = titleY + 2;
-	
-	GotoXY(slotX, slotY);
+	slotX = titleX + 7;
+	slotY = titleY + 2;
+
+	lastSixSevenMoveTime = state.curTime;
+
 	for (int i = 0; i < height; ++i)
 	{
 		for (int j = 0; j < width; ++j)
 		{
 			slotArr[i][j] = 0;
-			cout << slotArr[i][j] << " ";
 		}
-		GotoXY(slotX, slotY + i + 1);
 	}
 
-	SixSeven();
+	//식스세븐 바운더리 설정
+	titleX - 27
 }
 void InGameScene::Update(GameState& state)
 {
-	if (GetKeyDown(VK_SPACE))
+	if (GetKeyDown(VK_SPACE) && slotState == SlotMachineState::Idle)
 	{
-		RandomSlot();
+		slotState = SlotMachineState::Rolling;
+		lastSlotStartTime = state.curTime;
+		lastSlotUpdateTime = state.curTime;
+		//RandomSlot(state);
 	}
+
+	//슬롯머신 상태에 따라 업데이트해줄꺼
+	if (slotState == SlotMachineState::Rolling)
+	{
+		if (state.curTime - lastSlotUpdateTime >= 10)
+		{
+			lastSlotUpdateTime = state.curTime;
+
+			for (int i = 0; i < height; ++i)
+			{
+				for (int j = 0; j < width; ++j)
+				{
+					slotArr[i][j] = rand() % 7 + 1;
+				}
+			}
+		}
+
+		if (state.curTime - lastSlotStartTime >= 1500)
+		{
+			slotState = SlotMachineState::Blinking;
+			lastSlotBlinkTime = state.curTime;
+			blinkCount = 0;
+			isBlink = false;
+		}
+	}
+	if (slotState == SlotMachineState::Blinking)
+	{
+		if (state.curTime - lastSlotBlinkTime >= 100 && !isBlink)
+		{
+			lastSlotBlinkTime = state.curTime;
+			isBlink = true;
+			blinkCount++;
+
+			if (blinkCount >= 5)
+			{
+				sixSevenCount = 0;
+				isSixSeven = true;
+				ShakeConsoleWindow(20, 1250,0.01f);
+				slotState = SlotMachineState::SixSeven;
+			}
+		}
+		else if (isBlink)
+		{
+			if (state.curTime - lastSlotBlinkTime >= 100)
+			{
+				lastSlotBlinkTime = state.curTime;
+				isBlink = false;
+			}
+		}
+	}
+	if (slotState == SlotMachineState::SixSeven)
+	{
+		if (sixSevenCount > 10)
+		{
+			isSixSeven = false;
+			slotState = SlotMachineState::Idle;
+		}
+	}
+
+	if (isSixSeven)
+	{
+		if (state.curTime - lastSixSevenMoveTime >= 100)
+		{
+			lastSixSevenMoveTime = state.curTime;
+			bonusY *= -1;
+			sixSevenCount++;
+		}
+	}
+
+	UpdateShakeConsoleWindow();
 }
 void InGameScene::Render(const GameState& state)
 {
 	GotoXY(0, 0);
-	std::setw(30);
-	cout << "                    ";
+
+	DrawUI();
+	DrawSlotMachine();
+	DrawSlotNumbers();
+	DrawSixSeven();
+}
+
+void InGameScene::DrawUI()
+{
 	GotoXY(0, 0);
+	SetColor();
 	cout << "Coin:" << coin;
 }
 
-void InGameScene::RandomSlot()
+void InGameScene::DrawSlotMachine()
 {
-	for (int w = 0; w < 150; ++w)
+	SetColor();
+
+	for (int i = 0; i < asciiArts.slotMachine.size(); ++i)
 	{
-		GotoXY(slotX, slotY);
-		for (int i = 0; i < height; ++i)
-		{
-			for (int j = 0; j < width; ++j)
-			{
-				slotArr[i][j] = rand() % 7 + 1;
-				cout << slotArr[i][j] << " ";
-			}
-			GotoXY(slotX, slotY + i + 1);
-		}
-		Sleep(10);
-	}
-	
-	int addCoin = 0;
-
-	for (int w = 0; w < 5; ++w)
-	{
-		for (int i = 0; i < height; ++i)
-		{
-			for (int j = 0; j < width; ++j)
-			{
-				if (slotArr[i][j] == 7 || slotArr[i][j] == 6)
-				{
-					GotoXY(slotX + j * 2, slotY + i);
-					SetColor();
-					cout << slotArr[i][j];
-				}
-				else if (slotArr[i][j] == 1)
-				{
-					GotoXY(slotX + j * 2, slotY + i);
-					SetColor();
-					cout << slotArr[i][j];
-				}
-			}
-		}
-		Sleep(100);
-		for (int i = 0; i < height; ++i)
-		{
-			for (int j = 0; j < width; ++j)
-			{
-				if (slotArr[i][j] == 7 || slotArr[i][j] == 6)
-				{
-					GotoXY(slotX + j * 2, slotY + i);
-					SetColor(Color::WHITE, Color::YELLOW);
-					cout << slotArr[i][j];
-
-					addCoin++;
-				}
-				else if (slotArr[i][j] == 1)
-				{
-					GotoXY(slotX + j * 2, slotY + i);
-					SetColor(Color::WHITE, Color::RED);
-					cout << slotArr[i][j];
-
-					addCoin--;
-				}
-			}
-		}
-		Sleep(100);
-		coin += addCoin;
-		SetColor();
+		GotoXY(titleX, titleY + i);
+		cout << asciiArts.slotMachine[i];
 	}
 }
 
-void InGameScene::SixSeven()
+void InGameScene::DrawSlotNumbers()
 {
-	/*int x = res.X / 2 - 4;
-	int y = res.Y / 3 * 2;
+	for (int i = 0; i < height; ++i)
+	{
+		for (int j = 0; j < width; ++j)
+		{
+			GotoXY(slotX + j * 2, slotY + i);
 
-	int titleX = (res.X - 60) / 2;
-	int titleY = res.Y / 4;*/
+			if ((slotArr[i][j] == 7 || slotArr[i][j] == 6)
+				&& slotState == SlotMachineState::Blinking
+				&& isBlink)
+				SetColor(Color::WHITE, Color::YELLOW);
+			else if (slotArr[i][j] == 1
+				&& slotState == SlotMachineState::Blinking
+				&& isBlink)
+				SetColor(Color::WHITE, Color::RED);
+			else
+				SetColor();
+
+			cout << slotArr[i][j];
+			SetColor();
+			cout << " ";
+		}
+	}
+}
+
+void InGameScene::DrawSixSeven()
+{
+	if (!isSixSeven) return;
 
 	SetUniCodeMode();
-	for (int i = 0; i < 27; ++i)
+
+	for (int i = 0; i < asciiArts.six.size(); ++i)
 	{
-		GotoXY(20, 10 + i);
+		SetColor(Color::BLUE);
+		GotoXY(titleX - 27, titleY + i + bonusY);
 		wcout << asciiArts.six[i];
 	}
 
-	for (int i = 0; i < 22; ++i)
+	for (int i = 0; i < asciiArts.seven.size(); ++i)
 	{
-		GotoXY(40, 10 + i);
+		SetColor(Color::RED);
+		GotoXY(titleX + 25, titleY + i - bonusY + 1);
 		wcout << asciiArts.seven[i];
 	}
+	SetColor();
+
 	SetDefaultMode();
 }
