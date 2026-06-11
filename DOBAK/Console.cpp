@@ -151,6 +151,17 @@ void SetConsoleWindowStyle(bool showTitleBar)
 		, SWP_NOSIZE | SWP_NOMOVE | SWP_FRAMECHANGED);
 }
 
+static bool g_isShaking = false;
+static int g_shakeIntensity = 0;
+static float g_shakeDuration = 0;
+static float g_shakeInterval = 0;
+
+static ULONGLONG g_shakeStartTime = 0;
+static ULONGLONG g_lastShakeTime = 0;
+
+static int g_originX = 0;
+static int g_originY = 0;
+
 void ShakeConsoleWindow(int intensity, int duration, int interval)
 {
 	// intensity : 얼마나 세게 틀지 쉐이크 강도
@@ -160,27 +171,47 @@ void ShakeConsoleWindow(int intensity, int duration, int interval)
 	HWND hWnd = GetConsoleWindow();
 	RECT windowRect;
 	GetWindowRect(hWnd, &windowRect);
-	int originX = windowRect.left;
-	int originY = windowRect.top;
 
-	//흔들고
-	int count = duration / interval;
-	for (int i = 0; i < count; ++i)
+	g_originX = windowRect.left;
+	g_originY = windowRect.top;
+
+	g_shakeIntensity = intensity;
+	g_shakeDuration = duration;
+	g_shakeInterval = interval;
+
+	g_shakeStartTime = GetTickCount64();
+	g_lastShakeTime = g_shakeStartTime;
+	g_isShaking = true;
+
+}
+
+void UpdateShakeConsoleWindow()
+{
+	if (!g_isShaking)
+		return;
+
+	ULONGLONG curTime = GetTickCount64();
+	HWND hWnd = GetConsoleWindow();
+
+	if (curTime - g_shakeStartTime >= (ULONGLONG)g_shakeDuration)
 	{
-		// -intensity ~ +intensity;
-		int offsetX = rand() % (intensity * 2 + 1) - intensity;
-		int offsetY = rand() % (intensity * 2 + 1) - intensity;
-
-		SetWindowPos(hWnd, nullptr,
-			originX + offsetX,
-			originY + offsetY,
-			0, 0, SWP_NOSIZE);
-		Sleep(interval);
+		SetWindowPos(hWnd, nullptr, g_originX, g_originY, 0, 0, SWP_NOSIZE);
+		g_isShaking = false;
+		return;
 	}
 
+	if (curTime - g_lastShakeTime >= (ULONGLONG)g_shakeInterval)
+	{
+		g_lastShakeTime = curTime;
 
-	//원상복귀
-	SetWindowPos(hWnd, nullptr, originX, originY, 0, 0, SWP_NOSIZE);
+		int offsetX = rand() % (g_shakeIntensity * 2 + 1) - g_shakeIntensity;
+		int offsetY = rand() % (g_shakeIntensity * 2 + 1) - g_shakeIntensity;
+
+		SetWindowPos(hWnd, nullptr,
+			g_originX + offsetX,
+			g_originY + offsetY,
+			0, 0, SWP_NOSIZE);
+	}
 }
 
 void GotoXY(int x, int y)
