@@ -10,8 +10,8 @@ public:
 	void Update(GameState& state) override;
 	void Render(const GameState& state) override;
 private:
-    void PlayOpenTransition(const GameState& state, float delaymilisecond);
-    void PlayCloseTransition(const GameState& state, float delayMilisecond);
+    void PlayOpenTransition(const GameState& state, unsigned long  delaymilisecond);
+    void PlayCloseTransition(const GameState& state, unsigned long  delayMilisecond);
     void RenderSixSeven(const GameState& state);
 private:
     ShopTab _curTab = ShopTab::BUY;

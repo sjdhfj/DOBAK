@@ -29,7 +29,7 @@ void ShopScene::Init(GameState& state)
     _curTab = ShopTab::BUY;
     _cursor = 0;
     state.player.gold = 500;
-    SetConsoleSize(WIDTH, HEIGHT);
+    //SetConsoleSize(WIDTH, HEIGHT);
     _shopItems = state.shopItems;
 
     state.player.inventory =
@@ -37,7 +37,7 @@ void ShopScene::Init(GameState& state)
         { 6767, "676767676767", "676767", 6767 * 2, ItemType::EQUIP },
         { 67, "67676767", "676767",  67 * 2, ItemType::EQUIP },
     };
-    PlayOpenTransition(state, 0.01f);
+    PlayOpenTransition(state, 1);
 }
 
 void ShopScene::Update(GameState& state)
@@ -97,8 +97,8 @@ void ShopScene::Update(GameState& state)
 
     if (GetKeyDown(VK_ESCAPE))
     {
-        PlayCloseTransition(state, 0.01f);
-        SceneManager::GetInst()->ChangeScene("TitleScene", state);
+        PlayCloseTransition(state, 1);
+        SceneManager::GetInst()->ChangeScene("InGameScene", state);
     }
     if (_isSmiling && state.curTime - _smileTimer > 1000)
         _isSmiling = false;
@@ -114,6 +114,9 @@ void ShopScene::Update(GameState& state)
 
 void ShopScene::Render(const GameState& state)
 {
+    COORD res = GetConsoleResolution();
+    GotoXY(res.X / 2, res.Y);
+    cout << "[ESC]를 눌러 상점을 나갈 수 있습니다.";
     SetColor();
     auto noConststate = state;
     const auto& list = CurList(noConststate);
@@ -179,6 +182,7 @@ void ShopScene::Render(const GameState& state)
     }
     //SetUniCodeMode();
     RenderSixSeven(state);
+    ShakeConsoleWindow(100, 100, 100);
 }
 void ShopScene::RenderSixSeven(const GameState& state)
 {
@@ -210,13 +214,13 @@ void ShopScene::RenderSixSeven(const GameState& state)
 
     SetDefaultMode();
 }
-void ShopScene::PlayOpenTransition(const GameState& state, float delaymilisecond)
+void ShopScene::PlayOpenTransition(const GameState& state, unsigned long  delaymilisecond)
 {
     COORD res = GetConsoleResolution();
     int W = res.X;
     int H = res.Y;
     int half = W / 2;
-    float delayMs = delaymilisecond;
+    unsigned long delayMs = delaymilisecond;
     int colorCount = (int)Color::END;
 
     for (int row = 0; row < H; ++row)
@@ -258,13 +262,13 @@ void ShopScene::PlayOpenTransition(const GameState& state, float delaymilisecond
     Render(state);
 }
 
-void ShopScene::PlayCloseTransition(const GameState& state, float delayMilisecond)
+void ShopScene::PlayCloseTransition(const GameState& state, unsigned long  delayMilisecond)
 {
     COORD res = GetConsoleResolution();
     int W = res.X;
     int H = res.Y;
     int half = W / 2;
-    float delayMs = delayMilisecond;
+    unsigned long  delayMs = delayMilisecond;
     int colorCount = (int)Color::END;
 
     for (int step = 1; step <= half; ++step)

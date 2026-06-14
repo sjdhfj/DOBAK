@@ -54,9 +54,6 @@
     <ClCompile Include="Game.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="UI.cpp">
-      <Filter>AH\CPP</Filter>
-    </ClCompile>
     <ClCompile Include="TitleScene.cpp">
       <Filter>AH\CPP</Filter>
     </ClCompile>
@@ -101,9 +98,6 @@
     <ClInclude Include="UIAsciiObjs.h">
       <Filter>AH\Header</Filter>
     </ClInclude>
-    <ClInclude Include="UI.h">
-      <Filter>AH\Header</Filter>
-    </ClInclude>
     <ClInclude Include="GameState.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -127,6 +121,12 @@
     </ClInclude>
     <ClInclude Include="Pattern.h">
       <Filter>KYM\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="ICommand.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

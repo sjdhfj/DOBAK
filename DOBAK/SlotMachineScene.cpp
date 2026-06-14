@@ -1,6 +1,7 @@
 ﻿#include "SlotMachineScene.h"
 #include "Console.h"
 #include "AsciiArt.h"
+#include "SceneManager.h"
 
 //int main()
 //{
@@ -46,9 +47,9 @@ void InGameScene::Init(GameState& state)
 
 	titleX = (res.X - 25) / 2;
 	titleY = res.Y / 4;
-
-	SetConsoleFont(L"NSimSun", { 20,25 }, FW_BOLD);
-
+	 
+	//SetConsoleFont(L"NSimSun", { 20,25 }, FW_BOLD);
+	SetConsoleSize(180, 49);
 	for (int i = 0; i < height; ++i)
 	{
 		slotArr[i] = new int[width];
@@ -68,10 +69,12 @@ void InGameScene::Init(GameState& state)
 	}
 
 	//식스세븐 바운더리 설정
-	titleX - 27
+	//titleX - 27
 }
 void InGameScene::Update(GameState& state)
 {
+	if (GetKeyDown('B'))
+		SceneManager::GetInst()->ChangeScene("ShopScene", state);
 	if (GetKeyDown(VK_SPACE) && slotState == SlotMachineState::Idle)
 	{
 		slotState = SlotMachineState::Rolling;

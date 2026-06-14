@@ -90,7 +90,7 @@ void SetConsoleSize(int width, int height)
 	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 	int posX = (screenWidth - windowWidth) / 2;
 	int posY = (screenHeight - windowHeight) / 2;
-	SetWindowPos(hWnd, nullptr, posX, posY, 0, 0, SWP_NOSIZE);
+	SetWindowPos(hWnd, nullptr, posX, posY, 0, 0, SWP_NOSIZE | SWP_FRAMECHANGED);
 }
 void SetConsoleFullScreen()
 {

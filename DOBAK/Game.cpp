@@ -6,21 +6,28 @@
 #include "InfoScene.h"
 #include "SceneManager.h"
 #include "ShopScene.h"
+#include "Commands.h"
 
 void Init(GameState& state)
 {
-	SetConsoleWindowStyle(true);
+	SetConsoleWindowStyle(false);
 	SetConsoleFont(L"NSimSun", { 8, 16 });
 	SOUND->Init();
 	srand((unsigned int)time(nullptr));
 	SetConsoleSize(WIDTH, HEIGHT);
-	SetCursorVisible(true);
+	SetCursorVisible(false);
 	SetConsoleMouseInputDisable();
 	state = GameState{};
 
 	state.shopItems = 
 	{
-		{1, "name", "slot", 100, ItemType::CONSUME}
+		{1, "name", "description", 100, ItemType::CONSUME, new GoldCommand(10),
+			{
+				" ___ ",
+				"($$$)",
+				" --- "
+			}
+		}
 	};
 
 	SceneManager::GetInst()->RegisterScene("TitleScene", std::make_unique<TitleScene>());
