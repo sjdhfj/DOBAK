@@ -35,6 +35,14 @@ bool isSixSeven = false;
 vector<vector<int>> sixBoundary(45, vector<int>(17));
 vector<vector<int>> sevenBoundary(45, vector<int>(17));
 
+//패턴 블링크 관련
+vector<MatchedPattern> matchedPatterns;
+
+int curPatternIndex = 0;
+int patternBlinkCount = 0;
+bool isPatternBlink = false;
+ULONGLONG lastPatternBlinkTime = 0;
+
 
 void InGameScene::Init(GameState& state)
 {
@@ -90,45 +98,58 @@ void InGameScene::Update(GameState& state)
 			{
 				for (int j = 0; j < width; ++j)
 				{
-					slotArr[i][j] = rand() % 7 + 1;
+					slotArr[i][j] = rand() % 2 + 1;
 				}
 			}
 		}
 
 		if (state.curTime - lastSlotStartTime >= 1500)
 		{
-			slotState = SlotMachineState::Blinking;
-			lastSlotBlinkTime = state.curTime;
-			blinkCount = 0;
-			isBlink = false;
+			FindMatchedPatterns();
+
+			if (matchedPatterns.empty())
+			{
+				slotState = SlotMachineState::Idle;
+			}
+			else
+			{
+				curPatternIndex = 0;
+				patternBlinkCount = 0;
+				isPatternBlink = false;
+				lastPatternBlinkTime = state.curTime;
+
+				slotState = SlotMachineState::Blinking;
+			}
 		}
 	}
 	if (slotState == SlotMachineState::Blinking)
 	{
-		if (state.curTime - lastSlotBlinkTime >= 100 && !isBlink)
+		if (state.curTime - lastPatternBlinkTime >= 50)
 		{
-			lastSlotBlinkTime = state.curTime;
-			isBlink = true;
-			blinkCount++;
+			lastPatternBlinkTime = state.curTime;
+			isPatternBlink = !isPatternBlink;
 
-			if (blinkCount >= 5)
+			if (isPatternBlink)
 			{
-				int reword = CalculateReward();
-				state.player.gold += reword;
-
-				sixSevenCount = 0;
-				isSixSeven = true;
-				lastSixSevenMoveTime = state.curTime;
-				ShakeConsoleWindow(20, 1250,0.01f);
-				slotState = SlotMachineState::SixSeven;
+				patternBlinkCount++;
 			}
-		}
-		else if (isBlink)
-		{
-			if (state.curTime - lastSlotBlinkTime >= 100)
+
+			if (patternBlinkCount > 3)
 			{
-				lastSlotBlinkTime = state.curTime;
-				isBlink = false;
+				state.player.gold += matchedPatterns[curPatternIndex].reward;
+
+				curPatternIndex++;
+				patternBlinkCount = 0;
+				isPatternBlink = false;
+
+				if (curPatternIndex >= matchedPatterns.size())
+				{
+					sixSevenCount = 0;
+					isSixSeven = true;
+					lastSixSevenMoveTime = state.curTime;
+					ShakeConsoleWindow(20, 1250, 1);
+					slotState = SlotMachineState::SixSeven;
+				}
 			}
 		}
 	}
@@ -195,23 +216,37 @@ void InGameScene::DrawSlotNumbers()
 		for (int j = 0; j < width; ++j)
 		{
 			GotoXY(slotX + j * 2, slotY + i);
-
-			if ((slotArr[i][j] == 7 || slotArr[i][j] == 6)
-				&& slotState == SlotMachineState::Blinking
-				&& isBlink)
+			if (IsCurrentPatternCell(i, j))
+			{
 				SetColor(Color::WHITE, Color::YELLOW);
-			else if (slotArr[i][j] == 1
-				&& slotState == SlotMachineState::Blinking
-				&& isBlink)
-				SetColor(Color::WHITE, Color::RED);
+			}
 			else
 				SetColor();
 
 			cout << slotArr[i][j];
 			SetColor();
-			cout << " ";
+			cout << ' ';
 		}
 	}
+}
+
+bool InGameScene::IsCurrentPatternCell(int y, int x)
+{
+	if (slotState != SlotMachineState::Blinking)
+		return false;
+
+	if (!isPatternBlink)
+		return false;
+
+	if (curPatternIndex >= matchedPatterns.size())
+		return false;
+
+	MatchedPattern& match = matchedPatterns[curPatternIndex];
+
+	return y >= match.startY &&
+		y < match.startY + match.height &&
+		x >= match.startX &&
+		x < match.startX + match.width;
 }
 
 void InGameScene::DrawSixSeven()
@@ -278,6 +313,33 @@ int InGameScene::CheckPatternReward(const Pattern& pattern)
 
 	return totalReward;
 }
+void InGameScene::FindMatchedPatterns()
+{
+	matchedPatterns.clear();
+
+	for (int p = 0; p < GamePatternCount; ++p)
+	{
+		Pattern& pattern = GamePatterns[p];
+
+		for (int y = 0; y <= height - pattern.height; ++y)
+		{
+			for (int x = 0; x <= width - pattern.width; ++x)
+			{
+				if (IsSameInArea(y, x, pattern.width, pattern.height))
+				{
+					matchedPatterns.push_back(
+					{
+						y,
+						x,
+						pattern.width,
+						pattern.height,
+						pattern.reward
+					});
+				}
+			}
+		}
+	}
+}
 bool InGameScene::IsSameInArea(int startY, int startX, int patternWidth, int patternHeight)
 {
 	int firstValue = slotArr[startY][startX];
@@ -293,6 +355,7 @@ bool InGameScene::IsSameInArea(int startY, int startX, int patternWidth, int pat
 
 	return true;
 }
+
 
 int InGameScene::CalculateReward()
 {

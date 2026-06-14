@@ -16,9 +16,11 @@ class InGameScene : public AbstractScene
 	void DrawUI(const GameState& state);
 	void DrawSlotMachine();
 	void DrawSlotNumbers();
+	bool IsCurrentPatternCell(int y, int x);
 	void DrawSixSeven();
 	void ClearSixSeven();
 	int CheckPatternReward(const Pattern& pattern);
 	bool IsSameInArea(int startY, int startX, int patternWidth, int patternHeight);
+	void FindMatchedPatterns();
 	int CalculateReward();
 };
