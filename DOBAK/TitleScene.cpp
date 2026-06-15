@@ -1,5 +1,4 @@
 ﻿#include "TitleScene.h"
-
 static UIAsciiObjs objs;
 void TitleScene::Init(GameState& state)
 {

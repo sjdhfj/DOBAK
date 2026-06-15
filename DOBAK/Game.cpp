@@ -10,6 +10,7 @@
 
 void Init(GameState& state)
 {
+	SOUND->PlayBGM("Sound\\candyland (1).mp3");
 	SetConsoleWindowStyle(true);
 	SetConsoleFont(L"NSimSun", { 8, 16 });
 	SOUND->Init();
@@ -25,6 +26,27 @@ void Init(GameState& state)
 			{
 				" ___ ",
 				"($$$)",
+				" --- "
+			}
+		},
+		{2, "name", "description", 100, ItemType::CONSUME, new GoldCommand(10),
+			{
+				" --- ",
+				"|   |",
+				" --- "
+			}
+		},
+		{3, "name", "description", 100, ItemType::CONSUME, new GoldCommand(10),
+			{
+				" ___ ",
+				"(¤Ç¤Ç)",
+				" --- "
+			}
+		},
+		{4, "name", "description", 100, ItemType::CONSUME, new GoldCommand(10),
+			{
+				" ___ ",
+				"('a')",
 				" --- "
 			}
 		}

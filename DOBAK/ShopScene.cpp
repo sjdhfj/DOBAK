@@ -25,6 +25,8 @@ int ShopScene::CurPrice(const Item& item) const
 
 void ShopScene::Init(GameState& state)
 {
+    SetConsoleFont(L"NSimSun", { 8, 16 });
+    SetConsoleSize(WIDTH, HEIGHT);
     AsciiInit(objs);
     _curTab = ShopTab::BUY;
     _cursor = 0;
@@ -33,8 +35,9 @@ void ShopScene::Init(GameState& state)
 
     state.player.inventory =
     {
-        { 6767, "676767676767", "676767", 6767 * 2, ItemType::EQUIP },
+        { 6767, "676767676767", "676767", 6767 * 2, ItemType::EQUIP},
         { 67, "67676767", "676767",  67 * 2, ItemType::EQUIP },
+
     };
     PlayOpenTransition(state, 1);
 }
@@ -76,11 +79,11 @@ void ShopScene::Update(GameState& state)
         {
             if (state.player.gold >= item.price)
             {
-                ShakeConsoleWindow(20, 23, 1);
                 state.player.gold -= item.price;
                 state.player.inventory.push_back(item);
                 _isSmiling = true;
                 _smileTimer = state.curTime;
+                ShakeConsoleWindow(2, 50, 10);
             }
         }
         else
@@ -109,6 +112,7 @@ void ShopScene::Update(GameState& state)
         std::rotate(objs.shopSeven.rbegin(), objs.shopSeven.rbegin() + 1, objs.shopSeven.rend());
         _sixSevenTimer = state.curTime;
     }
+    UpdateShakeConsoleWindow();
 }
 
 void ShopScene::Render(const GameState& state)
@@ -185,7 +189,6 @@ void ShopScene::Render(const GameState& state)
     }
     //SetUniCodeMode();
     RenderSixSeven(state);
-    ShakeConsoleWindow(100, 100, 100);
 }
 void ShopScene::RenderSixSeven(const GameState& state)
 {
