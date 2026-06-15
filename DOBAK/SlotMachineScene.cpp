@@ -57,7 +57,7 @@ void InGameScene::Init(GameState& state)
 	titleX = (res.X - 25) / 2;
 	titleY = res.Y / 4;
 
-	SetConsoleFont(L"NSimSun", { 20,25 }, FW_BOLD);
+	//SetConsoleFont(L"NSimSun", { 20,25 }, FW_BOLD);
 
 	for (int i = 0; i < height; ++i)
 	{
@@ -98,7 +98,7 @@ void InGameScene::Update(GameState& state)
 			{
 				for (int j = 0; j < width; ++j)
 				{
-					slotArr[i][j] = rand() % 2 + 1;
+					slotArr[i][j] = rand() % 7 + 1;
 				}
 			}
 		}
@@ -147,7 +147,7 @@ void InGameScene::Update(GameState& state)
 					sixSevenCount = 0;
 					isSixSeven = true;
 					lastSixSevenMoveTime = state.curTime;
-					ShakeConsoleWindow(20, 1250, 1);
+					ShakeConsoleWindow(10, 1250, 1);
 					slotState = SlotMachineState::SixSeven;
 				}
 			}
