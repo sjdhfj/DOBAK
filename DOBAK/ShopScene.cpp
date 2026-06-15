@@ -13,11 +13,6 @@ std::vector<Item>& ShopScene::CurList(GameState& state)
     return (_curTab == ShopTab::BUY) ? _shopItems : state.player.inventory;
 }
 
-//const std::vector<Item>& ShopScene::CurList() const
-//{
-//    return (_curTab == ShopTab::BUY) ? _shopItems : _inventory;
-//}
-
 int ShopScene::CurPrice(const Item& item) const
 {
     return (_curTab == ShopTab::SELL) ? (int)(item.price * SellPricePercent) : item.price;
@@ -77,11 +72,11 @@ void ShopScene::Update(GameState& state)
         {
             if (state.player.gold >= item.price)
             {
+                ShakeConsoleWindow(20, 23, 1);
                 state.player.gold -= item.price;
                 state.player.inventory.push_back(item);
                 _isSmiling = true;
                 _smileTimer = state.curTime;
-                ShakeConsoleWindow(2, 23, 1);
             }
         }
         else
@@ -115,8 +110,8 @@ void ShopScene::Update(GameState& state)
 void ShopScene::Render(const GameState& state)
 {
     COORD res = GetConsoleResolution();
-    GotoXY(res.X / 2, res.Y);
-    cout << "[ESC]를 눌러 상점을 나갈 수 있습니다.";
+    GotoXY(res.X - 60, res.Y);
+    cout << "[ESC]를 눌러 상점을 나갈 수 있습니다." << '\n';
     SetColor();
     auto noConststate = state;
     const auto& list = CurList(noConststate);
@@ -247,7 +242,7 @@ void ShopScene::PlayOpenTransition(const GameState& state, unsigned long  delaym
     for (int step = 0; step < half; ++step)
     {
         int leftX = half - 1 - step; 
-        int rightX = half + step;    
+        int rightX = half + step;
 
         for (int y = 0; y < H; ++y)
         {

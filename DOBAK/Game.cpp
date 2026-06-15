@@ -10,7 +10,7 @@
 
 void Init(GameState& state)
 {
-	SetConsoleWindowStyle(false);
+	SetConsoleWindowStyle(true);
 	SetConsoleFont(L"NSimSun", { 8, 16 });
 	SOUND->Init();
 	srand((unsigned int)time(nullptr));
