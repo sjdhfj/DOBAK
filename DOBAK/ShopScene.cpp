@@ -110,8 +110,11 @@ void ShopScene::Update(GameState& state)
 void ShopScene::Render(const GameState& state)
 {
     COORD res = GetConsoleResolution();
-    GotoXY(res.X - 60, res.Y);
-    cout << "[ESC]를 눌러 상점을 나갈 수 있습니다." << '\n';
+    string esc = "[ESC]를 눌러 상점을 나갈 수 있습니다.";
+    int x = (res.X - (int)esc.length()) / 2;
+    SetColor();
+    GotoXY(x, res.Y - 1);
+    cout << esc;
     SetColor();
     auto noConststate = state;
     const auto& list = CurList(noConststate);
