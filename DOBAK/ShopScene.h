@@ -13,6 +13,7 @@ private:
     void PlayOpenTransition(const GameState& state, unsigned long  delaymilisecond);
     void PlayCloseTransition(const GameState& state, unsigned long  delayMilisecond);
     void RenderSixSeven(const GameState& state);
+    void RenderItemArt(const Item& item);
 private:
     ShopTab _curTab = ShopTab::BUY;
     int _cursor = 0;

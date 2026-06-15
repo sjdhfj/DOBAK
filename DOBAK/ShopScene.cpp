@@ -7,6 +7,11 @@ constexpr int ListY = ShopY + 6;
 constexpr int ListMax = 6;
 constexpr float SellPricePercent = 0.5f;
 constexpr int ArtX = 55;
+
+constexpr int ItemArtX = ShopX + 37;
+constexpr int ItemArtY = ListY;               
+constexpr int ItemArtWidth = ArtX - ItemArtX; 
+constexpr int ItemArtHeight = ListMax;
 static UIAsciiObjs objs;
 std::vector<Item>& ShopScene::CurList(GameState& state)
 {
@@ -23,7 +28,6 @@ void ShopScene::Init(GameState& state)
     AsciiInit(objs);
     _curTab = ShopTab::BUY;
     _cursor = 0;
-    state.player.gold = 500;
     //SetConsoleSize(WIDTH, HEIGHT);
     _shopItems = state.shopItems;
 
@@ -162,7 +166,8 @@ void ShopScene::Render(const GameState& state)
         cout << std::left << std::setw(35) << list[_cursor].description;
     else
         cout << std::setw(35) << "";
-
+    if (!list.empty())
+        RenderItemArt(list[_cursor]);
     GotoXY(ShopX, ListY + ListMax + 4);
     SetColor(Color::LIGHT_YELLOW);
     cout << "Gold: " << std::left << std::setw(10) << state.player.gold << "G";
@@ -284,4 +289,16 @@ void ShopScene::PlayCloseTransition(const GameState& state, unsigned long  delay
         Sleep(delayMs);
     }
     SetColor();
+}
+void ShopScene::RenderItemArt(const Item& item)
+{
+    SetColor();
+    for (int i = 0; i < ItemArtHeight; ++i)
+    {
+        GotoXY(ItemArtX, ItemArtY + i);
+        if (i < (int)item.art.size())
+            cout << std::left << std::setw(ItemArtWidth) << item.art[i];
+        else
+            cout << std::setw(ItemArtWidth) << "";
+    }
 }

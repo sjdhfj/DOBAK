@@ -3,6 +3,7 @@
 #include "AsciiArt.h"
 #include <vector>
 #include "Pattern.h"
+#include "SceneManager.h"
 
 //int main()
 //{
@@ -79,6 +80,10 @@ void InGameScene::Init(GameState& state)
 }
 void InGameScene::Update(GameState& state)
 {
+	if (GetKeyDown('B'))
+	{
+		SceneManager::GetInst()->ChangeScene("ShopScene", state);
+	}
 	if (GetKeyDown(VK_SPACE) && slotState == SlotMachineState::Idle)
 	{
 		slotState = SlotMachineState::Rolling;
