@@ -11,6 +11,7 @@ struct AsciiObjs
 	vector<string> slotMachine;
 	vector<wstring> six;
 	vector<wstring> seven;
+	vector<wstring> probabilityPanel;
 };
 
 void AsciiInit(AsciiObjs& objs);
