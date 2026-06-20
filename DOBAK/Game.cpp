@@ -7,7 +7,6 @@
 #include "SceneManager.h"
 #include "ShopScene.h"
 #include "Commands.h"
-
 void Init(GameState& state)
 {
 	SOUND->PlayBGM("Sound\\candyland (1).mp3");
@@ -22,28 +21,28 @@ void Init(GameState& state)
 
 	state.shopItems = 
 	{
-		{1, "name", "description", 100, ItemType::CONSUME, new GoldCommand(10),
+		{1, "name", "description", 100, ItemType::CONSUME, new AddGoldCommand(10),
 			{
 				" ___ ",
 				"($$$)",
 				" --- "
 			}
 		},
-		{2, "name", "description", 100, ItemType::CONSUME, new GoldCommand(10),
+		{2, "name", "description", 100, ItemType::CONSUME, new AddGoldCommand(10),
 			{
 				" --- ",
 				"|   |",
 				" --- "
 			}
 		},
-		{3, "name", "description", 100, ItemType::CONSUME, new GoldCommand(10),
+		{3, "name", "description", 100, ItemType::CONSUME, new AddGoldCommand(10),
 			{
 				" ___ ",
 				"(¤Ç¤Ç)",
 				" --- "
 			}
 		},
-		{4, "name", "description", 100, ItemType::CONSUME, new GoldCommand(10),
+		{4, "name", "description", 100, ItemType::CONSUME, new AddGoldCommand(10),
 			{
 				" ___ ",
 				"('a')",

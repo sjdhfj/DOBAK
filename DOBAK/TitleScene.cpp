@@ -22,7 +22,7 @@ void TitleScene::Update(GameState& state)
 		{
 		case Menu::START:
 			PlayTransition();
-			SceneManager::GetInst()->ChangeScene("InGameScene", state);//<-나 테스트 때메 이거 인게임 씬으로 바꿔둠 머지 시 니꺼 골라
+			SceneManager::GetInst()->ChangeScene("InGameScene", state);
 			break;
 		case Menu::INFO:
 			SceneManager::GetInst()->ChangeScene("InfoScene", state);
@@ -36,9 +36,27 @@ void TitleScene::Update(GameState& state)
 
 void TitleScene::Render(const GameState& state)
 {
-	AsciiRender(objs);
-	// 그려줄겁니다.
 	COORD res = GetConsoleResolution();
+
+	int titleX = (res.X - 70) / 2;
+	int titleY = res.Y / 3;
+	int titleWidth = objs.titleascii[0].size();
+	int titleHeight = objs.titleascii.size();
+
+	int menuX = res.X / 2 - 4 - 2; 
+	int menuY = res.Y / 3 * 2;
+	int menuWidth = 11;
+	int menuHeight = 3;  
+
+	vector<ExcludeRect> excludeRects =
+	{
+		{ titleX, titleY, titleWidth, titleHeight },
+		{ menuX, menuY, menuWidth, menuHeight }
+	};
+
+	AsciiRender(objs, excludeRects);
+	DrawTitle(objs);
+
 	int x = res.X / 2 - 4;
 	int y = res.Y / 3 * 2;
 
@@ -48,41 +66,7 @@ void TitleScene::Render(const GameState& state)
 		GotoXY(x - 2, y + i);
 		cout << (i == (int)_curMenu ? "> " : "  ") << labels[i];
 	}
-	const wstring ascii[] =
-	{
-		L"██████╗  ██████╗ ██████╗  █████╗ ██╗  ██╗",
-		L"██╔══██╗██╔═══██╗██╔══██╗██╔══██╗██║ ██╔╝",
-		L"██║  ██║██║   ██║██████╔╝███████║█████╔╝ ",
-		L"██║  ██║██║   ██║██╔══██╗██╔══██║██╔═██╗ ",
-		L"██████╔╝╚██████╔╝██████╔╝██║  ██║██║  ██╗",
-		L"╚═════╝  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝"
-	};
-	int titleX = (res.X - 70) / 2;
-	int titleY = res.Y / 3;
-	SetUniCodeMode();
-	for (int i = 0; i < 6; ++i)
-	{
-		GotoXY(titleX, titleY + i);
-		wcout << ascii[i];
-	}
-	SetDefaultMode();
-
-
-	/*GotoXY(x, y);
-	cout << "게임 시작";
-	GotoXY(x, y + 1);
-	cout << "게임 정보";
-	GotoXY(x, y + 2);
-	cout << "게임 종료";
-
-	GotoXY(x - 2, y);
-	cout << (_curMenu == Menu::START ? ">" : " ");
-	GotoXY(x - 2, y + 1);
-	cout << (_curMenu == Menu::INFO ? ">" : " ");
-	GotoXY(x - 2, y + 2);
-	cout << (_curMenu == Menu::QUIT ? ">" : " ");*/
 }
-
 void TitleScene::PlayTransition()
 {
 	COORD res = GetConsoleResolution();
@@ -150,7 +134,7 @@ void TitleScene::Circle(float prevAngle, float targetAngle, const string& fillCh
 			bool inPrev = (angle <= prevAngle);
 			bool inTarget = (angle <= targetAngle);
 
-			if (inTarget && !inPrev) //이번 프레임에 새로 그려야 될거
+			if (inTarget && !inPrev)
 			{
 				float angleRatio = angle / pibojung;
 				int colorIndex = (int)(angleRatio * colorCnt);
@@ -158,12 +142,12 @@ void TitleScene::Circle(float prevAngle, float targetAngle, const string& fillCh
 				if (colorIndex >= colorCnt) colorIndex = colorCnt - 1;				
 				Color c = (Color)colorIndex;
 
-				if (startX < 0) //시작점이 없으면
+				if (startX < 0) 
 				{
-					startX = x; //현재의 X값을 시작점으로 기억한다.
+					startX = x; 
 					color = c;
 				}
-				else if (c != color) //색이 바뀔때
+				else if (c != color)
 				{
 					GotoXY(startX, y);
 					SetColor(color, color);

@@ -1,7 +1,8 @@
 #pragma once
 struct ItemEffectContext
 {
-	int& coin;
+	int coin;
+	int probability;
 };
 
 class ICommand

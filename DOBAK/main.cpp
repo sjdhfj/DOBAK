@@ -9,7 +9,7 @@ int main()
 	GameState state;
 	Init(state);
 	SetConsoleSize(80, 40);
-	SOUND->PlayBGM("Sound\\candyland (1).mp3");
+	SOUND->PlayBGM("Sound\\f.mp3");
 	while (state.isRunning)
 	{
 		state.curTime = GetTickCount64();
