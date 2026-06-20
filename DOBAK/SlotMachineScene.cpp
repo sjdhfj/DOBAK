@@ -5,6 +5,8 @@
 #include "Pattern.h"
 #include "SceneManager.h"
 
+constexpr int SIXSEVENPOS = 30;
+
 //int main()
 //{
 //	Init();
@@ -44,11 +46,13 @@ int patternBlinkCount = 0;
 bool isPatternBlink = false;
 ULONGLONG lastPatternBlinkTime = 0;
 
+//시스템
+int currentDay = 1;
+
 
 void InGameScene::Init(GameState& state)
 {
-
-
+	SetConsoleSize(WIDTH, HEIGHT);
 	slotState = SlotMachineState::Idle;
 	AsciiInit(asciiArts);
 	srand((unsigned int)time(nullptr));
@@ -77,6 +81,8 @@ void InGameScene::Init(GameState& state)
 			slotArr[i][j] = 0;
 		}
 	}
+
+	DrawProbabilityUI(state);
 }
 void InGameScene::Update(GameState& state)
 {
@@ -103,7 +109,7 @@ void InGameScene::Update(GameState& state)
 			{
 				for (int j = 0; j < width; ++j)
 				{
-					slotArr[i][j] = rand() % 7 + 1;
+					slotArr[i][j] = rand() % 3 + 1;
 				}
 			}
 		}
@@ -113,6 +119,7 @@ void InGameScene::Update(GameState& state)
 			FindMatchedPatterns();
 
 			if (matchedPatterns.empty())
+				      
 			{
 				slotState = SlotMachineState::Idle;
 			}
@@ -129,8 +136,10 @@ void InGameScene::Update(GameState& state)
 	}
 	if (slotState == SlotMachineState::Blinking)
 	{
-		if (state.curTime - lastPatternBlinkTime >= 50)
+		if (state.curTime - lastPatternBlinkTime >= 80)
 		{
+			if (patternBlinkCount == 1)
+				ShakeConsoleWindow(5, 100, 1);
 			lastPatternBlinkTime = state.curTime;
 			isPatternBlink = !isPatternBlink;
 
@@ -152,7 +161,7 @@ void InGameScene::Update(GameState& state)
 					sixSevenCount = 0;
 					isSixSeven = true;
 					lastSixSevenMoveTime = state.curTime;
-					ShakeConsoleWindow(10, 1250, 1);
+					ShakeConsoleWindow(20, 1250, 1);
 					slotState = SlotMachineState::SixSeven;
 				}
 			}
@@ -203,6 +212,21 @@ void InGameScene::DrawUI(const GameState& state)
 	cout << "Coin:" << state.player.gold;
 }
 
+void InGameScene::DrawProbabilityUI(const GameState& state)
+{
+	COORD res = GetConsoleResolution();
+	int panelStartPos = res.X - asciiArts.probabilityPanel[0].length();;
+	GotoXY(panelStartPos, 0);
+	wcout << asciiArts.probabilityPanel[0];
+	for (int i = 0; i < res.Y - 2; ++i)
+	{
+		GotoXY(panelStartPos, 0 + i);
+		wcout << asciiArts.probabilityPanel[i];
+	}
+	GotoXY(panelStartPos, 0);
+	wcout << asciiArts.probabilityPanel[2];
+}
+
 void InGameScene::DrawSlotMachine()
 {
 	SetColor();
@@ -234,7 +258,53 @@ void InGameScene::DrawSlotNumbers()
 		}
 	}
 }
+void InGameScene::DrawSixSeven()
+{
+	if (!isSixSeven) return;
+	COORD res = GetConsoleResolution();
+	SetUniCodeMode();
 
+	SetColor(Color::BLUE);
+	for (int i = 0; i < asciiArts.six.size(); ++i)
+	{
+		GotoXY(SIXSEVENPOS, 6 + i + sixSevenMoveValue);
+		wcout << asciiArts.six[i];
+	}
+
+	SetColor(Color::RED);
+	for (int i = 0; i < asciiArts.seven.size(); ++i)
+	{
+		GotoXY(res.X - SIXSEVENPOS - asciiArts.seven[0].length(), 6 + i - sixSevenMoveValue);
+		wcout << asciiArts.seven[i];
+	}
+
+	SetColor();
+	SetDefaultMode();
+}
+
+void InGameScene::ClearSixSeven()
+{
+	SetUniCodeMode();
+	COORD res = GetConsoleResolution();
+	 
+	SetColor();
+
+	for (int i = 0; i < asciiArts.six.size() + 2; ++i)
+	{
+		GotoXY(SIXSEVENPOS, 5 + i + sixSevenMoveValue);
+		wcout << L"                         ";
+	}
+
+	for (int i = 0; i < asciiArts.seven.size() + 2; ++i)
+	{
+		GotoXY(res.X - SIXSEVENPOS - asciiArts.seven[0].length(), 5 + i - sixSevenMoveValue);
+		wcout << L"                       ";
+	}
+
+	SetDefaultMode();
+}
+
+//패턴 관련 메서드들
 bool InGameScene::IsCurrentPatternCell(int y, int x)
 {
 	if (slotState != SlotMachineState::Blinking)
@@ -254,53 +324,6 @@ bool InGameScene::IsCurrentPatternCell(int y, int x)
 		x < match.startX + match.width;
 }
 
-void InGameScene::DrawSixSeven()
-{
-	if (!isSixSeven) return;
-
-	SetUniCodeMode();
-
-	SetColor(Color::BLUE);
-	for (int i = 0; i < asciiArts.six.size(); ++i)
-	{
-		GotoXY(2, 6 + i + sixSevenMoveValue);
-		wcout << asciiArts.six[i];
-	}
-
-	SetColor(Color::RED);
-	for (int i = 0; i < asciiArts.seven.size(); ++i)
-	{
-		GotoXY(50, 6 + i - sixSevenMoveValue);
-		wcout << asciiArts.seven[i];
-	}
-
-	SetColor();
-	SetDefaultMode();
-}
-
-void InGameScene::ClearSixSeven()
-{
-	SetUniCodeMode();
-
-	 
-	SetColor();
-
-	for (int i = 0; i < asciiArts.six.size() + 2; ++i)
-	{
-		GotoXY(2, 5 + i + sixSevenMoveValue);
-		wcout << L"                         ";
-	}
-
-	for (int i = 0; i < asciiArts.seven.size() + 2; ++i)
-	{
-		GotoXY(50, 5 + i - sixSevenMoveValue);
-		wcout << L"                       ";
-	}
-
-	SetDefaultMode();
-}
-
-//패턴 관련 메서드들
 int InGameScene::CheckPatternReward(const Pattern& pattern)
 {
 	int totalReward = 0;
@@ -359,17 +382,4 @@ bool InGameScene::IsSameInArea(int startY, int startX, int patternWidth, int pat
 	}
 
 	return true;
-}
-
-
-int InGameScene::CalculateReward()
-{
-	int totalReward = 0;
-
-	for (int i = 0; i < GamePatternCount; ++i)
-	{
-		totalReward += CheckPatternReward(GamePatterns[i]);
-	}
-
-	return totalReward;
 }
