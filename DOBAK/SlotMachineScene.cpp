@@ -34,6 +34,17 @@ ULONGLONG lastPatternBlinkTime = 0;
 
 ItemEffectContext curItemEffects{};
 
+constexpr int InvX = 1;
+constexpr int InvY = 3;
+constexpr int CellW = 7;       
+constexpr int ArtH = 3;    
+constexpr int CellH = ArtH + 2; 
+constexpr int InvCols = 3;      
+constexpr int InvRows = 4;    
+constexpr int InvMax = InvCols * InvRows;
+
+int baseReward = 0;
+
 static void OnSpinComplete(GameState& state)
 {
     state.dailySpinCount++;
@@ -46,7 +57,7 @@ static void OnSpinComplete(GameState& state)
 
 void InGameScene::Init(GameState& state)
 {
-    SOUND->PlayBGM("Sound/Grand String Orchestration.wav");
+    SOUND->PlayBGM("Sound/a.mp3");
     SetConsoleSize(WIDTH, HEIGHT);
     slotState = SlotMachineState::Idle;
     AsciiInit(asciiArts);
@@ -94,7 +105,7 @@ void InGameScene::Update(GameState& state)
             lastSlotUpdateTime = state.curTime;
             for (int i = 0; i < height; ++i)
                 for (int j = 0; j < width; ++j)
-                    slotArr[i][j] = rand() % 3 + 1;
+                    slotArr[i][j] = rand() % 7 + 1;
         }
 
         int spinMs = std::max(MinSpinMs, BaseSpinMs - curItemEffects.spinSpeedBonus);
@@ -126,8 +137,19 @@ void InGameScene::Update(GameState& state)
     {
         if (state.curTime - lastPatternBlinkTime >= 80)
         {
+            baseReward = matchedPatterns[curPatternIndex].reward;
+
+            baseReward += curItemEffects.coin;
+
+            baseReward += curItemEffects.comboBonusPerPattern * curPatternIndex;
+
+            baseReward = (int)(baseReward * curItemEffects.multiplier);
             if (patternBlinkCount == 1)
+            {
                 ShakeConsoleWindow(5, 100, 1);
+                DrawPlusGold();
+                SOUND->Play("Pop");
+            }
 
             lastPatternBlinkTime = state.curTime;
             isPatternBlink = !isPatternBlink;
@@ -136,13 +158,6 @@ void InGameScene::Update(GameState& state)
 
             if (patternBlinkCount > 3)
             {
-                int baseReward = matchedPatterns[curPatternIndex].reward;
-
-                baseReward += curItemEffects.coin;
-
-                baseReward += curItemEffects.comboBonusPerPattern * curPatternIndex;
-
-                baseReward = (int)(baseReward * curItemEffects.multiplier);
 
                 state.player.gold += baseReward;
 
@@ -190,8 +205,38 @@ void InGameScene::Render(const GameState& state)
     DrawUI(state);
     DrawInventory(state);
     DrawSlotMachine();
-    DrawSlotNumbers();
+    DrawSlotNumbers(); 
     DrawSixSeven();
+    DrawPlusGold();
+    DrawProbabilityUI(state);
+}
+
+void InGameScene::DrawPlusGold()
+{
+    int startX = slotX - 4;
+    int startY = slotY - 5;
+
+    // 이전 출력 잔상 제거
+    SetColor();
+    for (int i = 0; i < 3; ++i)
+    {
+        GotoXY(startX, startY + i);
+        cout << "                         ";
+    }
+
+    if (slotState != SlotMachineState::Blinking)
+        return;
+
+    if (curPatternIndex >= matchedPatterns.size())
+        return;
+
+    int reward = baseReward;
+
+    SetColor(Color::LIGHT_YELLOW);
+
+    GotoXY(startX, startY);
+    wcout << "+" << reward << "G";
+    SetColor();
 }
 
 void InGameScene::DrawUI(const GameState& state)
@@ -207,14 +252,6 @@ void InGameScene::DrawUI(const GameState& state)
 
 void InGameScene::DrawInventory(const GameState& state)
 {
-    constexpr int InvX = 1;
-    constexpr int InvY = 3;
-    constexpr int CellW = 7;        // 셀 너비 (아트 5 + 여백 2)
-    constexpr int ArtH = 3;        // 아트 높이
-    constexpr int CellH = ArtH + 2; // 아트 + 이름 + 빈줄
-    constexpr int InvCols = 3;        // 한 줄에 몇 개
-    constexpr int InvRows = 4;        // 몇 줄
-    constexpr int InvMax = InvCols * InvRows;
 
     GotoXY(InvX, InvY);
     SetColor(Color::LIGHT_YELLOW);
@@ -300,15 +337,43 @@ void InGameScene::DrawInventory(const GameState& state)
 void InGameScene::DrawProbabilityUI(const GameState& state)
 {
     COORD res = GetConsoleResolution();
-    int panelStartPos = res.X - (int)asciiArts.probabilityPanel[0].length();
-    int panelLineCount = (int)asciiArts.probabilityPanel.size();
-    for (int i = 0; i < panelLineCount; ++i)
-    {
-        GotoXY(panelStartPos, i);
-        wcout << asciiArts.probabilityPanel[i];
-    }
-}
 
+    constexpr int panelWidth = 11;
+    constexpr int symbolCount = 7;
+
+    int panelX = res.X - panelWidth;
+    int panelY = 0;
+
+    SetColor(Color::LIGHT_YELLOW);
+
+    GotoXY(panelX, panelY);
+    cout << "+=========+";
+
+    GotoXY(panelX, panelY + 1);
+    cout << "| CHANCE  |";
+
+    SetColor(Color::WHITE);
+
+    double probability = 100.0 / symbolCount;
+
+    for (int number = 1; number <= symbolCount; ++number)
+    {
+        GotoXY(panelX, panelY + 1 + number);
+
+        cout << "|"
+            << number << ": "
+            << std::fixed << std::setprecision(2)
+            << probability << "%|";
+    }
+
+    SetColor(Color::LIGHT_YELLOW);
+
+    GotoXY(panelX, panelY + symbolCount + 2);
+    cout << "+=========+";
+
+    SetColor();
+    cout << std::defaultfloat;
+}
 void InGameScene::DrawSlotMachine()
 {
     SetColor();
