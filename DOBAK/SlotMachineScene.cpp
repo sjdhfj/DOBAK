@@ -195,7 +195,6 @@ void InGameScene::Update(GameState& state)
 	}
 
 	UpdateShakeConsoleWindow();
-	DrawPlusGold();
 }
 void InGameScene::Render(const GameState& state)
 {
@@ -205,6 +204,7 @@ void InGameScene::Render(const GameState& state)
 	DrawSlotMachine();
 	DrawSlotNumbers();
 	DrawSixSeven();
+	DrawPlusGold();
 }
 
 void InGameScene::DrawUI(const GameState& state)
@@ -217,12 +217,37 @@ void InGameScene::DrawUI(const GameState& state)
 
 void InGameScene::DrawPlusGold()
 {
-	if ()
+	int startX = slotX - 4;
+	int startY = slotY - 5;
 
-	int startYPos = slotY - 4;
-	int startXPos = slotX - 3;
-	GotoXY(startXPos, startYPos);
-	cout << "샌즈";
+	// 이전 출력 잔상 제거
+	SetColor();
+	for (int i = 0; i < 3; ++i)
+	{
+		GotoXY(startX, startY + i);
+		cout << "                         ";
+	}
+
+	if (slotState != SlotMachineState::Blinking)
+		return;
+
+	if (curPatternIndex >= matchedPatterns.size())
+		return;
+
+	int reward = matchedPatterns[curPatternIndex].reward;
+
+	SetColor(Color::LIGHT_YELLOW);
+
+	GotoXY(startX, startY);
+	cout << "+" << reward << "      _____";
+
+	GotoXY(startX, startY + 1);
+	cout << "          /  $  \\";
+
+	GotoXY(startX, startY + 2);
+	cout << "          \\_____/";
+
+	SetColor();
 }
 
 void InGameScene::DrawProbabilityUI(const GameState& state)
