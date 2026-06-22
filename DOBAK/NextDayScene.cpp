@@ -4,7 +4,15 @@
 void NextDayScene::Init(GameState& state)
 {
     _goldDiff = state.player.gold - state.goldAtDayStart;
-    state.day += 1;
+    state.day++;
+    state.dailySpinCount = 0;
+    state.quotaSubmitted = false;
+
+    // 3일마다 할당량 자동 증가
+    if (state.day % state.quotaIncreaseDay == 0)
+        state.dailyQuota += 300;
+
+    state.goldAtDayStart = state.player.gold;
     PlayOpenTransition(state, 1);
 }
 

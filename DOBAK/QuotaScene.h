@@ -14,4 +14,6 @@ public:
 private:
     void PlayOpenTransition(const GameState& state, unsigned long delayMs);
     void PlayCloseTransition(const GameState& state, unsigned long delayMs);
+    void PlaySubmitAnimation(const GameState& state);
+    void DrawPanel(const GameState& state) const;
 };

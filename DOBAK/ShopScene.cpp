@@ -127,7 +127,7 @@ void ShopScene::Update(GameState& state)
             _cursor = std::min(size - 1, _cursor + 1);
     }
 
-    if (GetKeyDown(VK_RETURN))
+    if (GetKey(VK_RETURN))
     {
         if (size == 0) return;
         Item& item = list[_cursor];
