@@ -3,13 +3,17 @@
 #define NOMINMAX
 constexpr int WIDTH = 160;
 constexpr int HEIGHT = 45;
-#include <Windows.h>
+#include <iostream>
+#include <ostream>
+#include <string>
 #include <vector>
+
+#include <Windows.h>
 #include "Item.h"
 struct PlayerData
 {
 	std::vector<Item> inventory;
-	int gold = 0;
+	ULONGLONG gold = 0;
 };
 struct GameState
 {
@@ -22,6 +26,9 @@ struct GameState
 	int day = 1;
 	int goldAtDayStart = 0;
 	int dailySpinCount = 0;
-	int dailyQuota = 1000;
+	ULONGLONG dailyQuota = 1000;
 	bool quotaMet = false;
+	bool quotaSubmitted = false;
+	int  quotaIncreaseDay = 3;
+	bool quotaFromDayEnd = false;
 };

@@ -129,7 +129,7 @@ void TitleScene::Circle(float prevAngle, float targetAngle, const string& fillCh
 
 		for (int x = 0; x < width; ++x)
 		{
-			float dx = (x - centerX) * bojung; //현제 픽셀에서 중심점까지의 거리
+			float dx = (x - centerX) * bojung;
 			float dy = y - centerY;
 			float angle = atan2f(dx, -dy);
 			if (angle < 0) angle += pibojung;

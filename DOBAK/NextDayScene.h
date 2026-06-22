@@ -12,5 +12,5 @@ private:
 	void PlayOpenTransition(const GameState& state, unsigned long delayMs);
 	void PlayCloseTransition(const GameState& state, unsigned long delayMs);
 private:
-	int _goldDiff = 0;
+	ULONGLONG _goldDiff = 0;
 };
