@@ -1,8 +1,12 @@
 ﻿#include "TitleScene.h"
+#include "SoundManager.h"
 static UIAsciiObjs objs;
 void TitleScene::Init(GameState& state)
 {
+	SOUND->StopBGM();
+	SOUND->PlayBGM("Sound/a.mp3");
 	AsciiInit(objs);
+	SetConsoleSize(80, 40);
 }
 void TitleScene::Update(GameState& state)
 {

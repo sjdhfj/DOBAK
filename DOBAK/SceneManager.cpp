@@ -5,6 +5,11 @@ void SceneManager::Update(GameState& state)
 {
 	if (m_curScene)
 		m_curScene->Update(state);
+    if (state.requestNextDay)
+    {
+        state.requestNextDay = false;
+        ChangeScene("NextDayScene", state);
+    }
 }
 void SceneManager::Render(const GameState& state)
 {

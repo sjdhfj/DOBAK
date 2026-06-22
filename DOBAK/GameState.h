@@ -18,4 +18,10 @@ struct GameState
 	ULONGLONG curTime;
 	std::vector<Item> shopItems = {};
 	PlayerData player;
+	bool requestNextDay = false;
+	int day = 1;
+	int goldAtDayStart = 0;
+	int dailySpinCount = 0;
+	int dailyQuota = 1000;
+	bool quotaMet = false;
 };

@@ -134,8 +134,11 @@
     <ClCompile Include="InfoScene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="AsciiArt.cpp" />
+    <ClCompile Include="NextDayScene.cpp" />
     <ClCompile Include="Pattern.cpp" />
+    <ClCompile Include="QuotaScene.cpp" />
     <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="ShopItems.cpp" />
     <ClCompile Include="ShopScene.cpp" />
     <ClCompile Include="SlotMachineScene.cpp" />
     <ClCompile Include="SoundManager.cpp" />
@@ -153,9 +156,12 @@
     <ClInclude Include="ICommand.h" />
     <ClInclude Include="InfoScene.h" />
     <ClInclude Include="Item.h" />
+    <ClInclude Include="NextDayScene.h" />
     <ClInclude Include="Pattern.h" />
+    <ClInclude Include="QuotaScene.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="ShopItems.h" />
     <ClInclude Include="ShopScene.h" />
     <ClInclude Include="SlotMachineScene.h" />
     <ClInclude Include="SoundManager.h" />
