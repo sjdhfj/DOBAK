@@ -91,6 +91,7 @@ void InGameScene::Update(GameState& state)
 
     if (GetKeyDown(VK_SPACE) && slotState == SlotMachineState::Idle)
     {
+        baseReward = 0;
         curItemEffects = CollectItemEffects(state);
 
         slotState = SlotMachineState::Rolling;
@@ -100,6 +101,7 @@ void InGameScene::Update(GameState& state)
 
     if (slotState == SlotMachineState::Rolling)
     {
+
         if (state.curTime - lastSlotUpdateTime >= 10)
         {
             lastSlotUpdateTime = state.curTime;
@@ -135,19 +137,19 @@ void InGameScene::Update(GameState& state)
 
     if (slotState == SlotMachineState::Blinking)
     {
-        if (state.curTime - lastPatternBlinkTime >= 80)
+        if (state.curTime - lastPatternBlinkTime >= 50)
         {
-            baseReward = matchedPatterns[curPatternIndex].reward;
-
-            baseReward += curItemEffects.coin;
-
-            baseReward += curItemEffects.comboBonusPerPattern * curPatternIndex;
-
-            baseReward = (int)(baseReward * curItemEffects.multiplier);
             if (patternBlinkCount == 1)
             {
                 ShakeConsoleWindow(5, 100, 1);
                 DrawPlusGold();
+                baseReward += matchedPatterns[curPatternIndex].reward;
+
+                baseReward += curItemEffects.coin;
+
+                baseReward += curItemEffects.comboBonusPerPattern * curPatternIndex;
+
+                baseReward = (int)(baseReward * curItemEffects.multiplier);
                 SOUND->Play("Pop");
             }
 
@@ -158,8 +160,6 @@ void InGameScene::Update(GameState& state)
 
             if (patternBlinkCount > 3)
             {
-
-                state.player.gold += baseReward;
 
                 curPatternIndex++;
                 patternBlinkCount = 0;
@@ -172,6 +172,8 @@ void InGameScene::Update(GameState& state)
                     lastSixSevenMoveTime = state.curTime;
                     ShakeConsoleWindow(20, 1250, 1);
                     slotState = SlotMachineState::SixSeven;
+                    state.player.gold += baseReward;
+                    SOUND->Play("67");
                 }
             }
         }
@@ -235,7 +237,7 @@ void InGameScene::DrawPlusGold()
     SetColor(Color::LIGHT_YELLOW);
 
     GotoXY(startX, startY);
-    wcout << "+" << reward << "G";
+    wcout << "총 획득량: +" << reward << "G";
     SetColor();
 }
 
