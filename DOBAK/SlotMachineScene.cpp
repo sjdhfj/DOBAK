@@ -102,12 +102,13 @@ void InGameScene::Update(GameState& state)
     if (slotState == SlotMachineState::Rolling)
     {
 
-        if (state.curTime - lastSlotUpdateTime >= 10)
+        if (state.curTime - lastSlotUpdateTime >= 20)
         {
+            SOUND->Play("Rolling");
             lastSlotUpdateTime = state.curTime;
             for (int i = 0; i < height; ++i)
                 for (int j = 0; j < width; ++j)
-                    slotArr[i][j] = rand() % 7 + 1;
+                    slotArr[i][j] = rand() % 1 + 1;
         }
 
         int spinMs = std::max(MinSpinMs, BaseSpinMs - curItemEffects.spinSpeedBonus);
@@ -139,17 +140,9 @@ void InGameScene::Update(GameState& state)
     {
         if (state.curTime - lastPatternBlinkTime >= 50)
         {
-            if (patternBlinkCount == 1)
-            {
+            if (patternBlinkCount == 1 && isPatternBlink)
+            {   
                 ShakeConsoleWindow(5, 100, 1);
-                DrawPlusGold();
-                baseReward += matchedPatterns[curPatternIndex].reward;
-
-                baseReward += curItemEffects.coin;
-
-                baseReward += curItemEffects.comboBonusPerPattern * curPatternIndex;
-
-                baseReward = (int)(baseReward * curItemEffects.multiplier);
                 SOUND->Play("Pop");
             }
 
@@ -160,6 +153,20 @@ void InGameScene::Update(GameState& state)
 
             if (patternBlinkCount > 3)
             {
+                MatchedPattern& match =
+                    matchedPatterns[curPatternIndex];
+
+                Pattern& pattern =
+                    GamePatterns[match.patternIndex];
+
+                ExecutePatternEvent(pattern, state);
+
+                // 특수 이벤트 상태로 넘어갔다면 여기서 중단
+                if (slotState == SlotMachineState::SixSeven)
+                {
+                    isPatternBlink = false;
+                    return;
+                }
 
                 curPatternIndex++;
                 patternBlinkCount = 0;
@@ -167,13 +174,9 @@ void InGameScene::Update(GameState& state)
 
                 if (curPatternIndex >= (int)matchedPatterns.size())
                 {
-                    sixSevenCount = 0;
-                    isSixSeven = true;
-                    lastSixSevenMoveTime = state.curTime;
-                    ShakeConsoleWindow(20, 1250, 1);
-                    slotState = SlotMachineState::SixSeven;
                     state.player.gold += baseReward;
-                    SOUND->Play("67");
+                    OnSpinComplete(state);
+                    slotState = SlotMachineState::Idle;
                 }
             }
         }
@@ -478,9 +481,18 @@ void InGameScene::FindMatchedPatterns()
         Pattern& pattern = GamePatterns[p];
         for (int y = 0; y <= height - pattern.height; ++y)
             for (int x = 0; x <= width - pattern.width; ++x)
-                if (IsSameInArea(y, x, pattern.width, pattern.height))
-                    matchedPatterns.push_back({ y, x,
-                        pattern.width, pattern.height, pattern.reward });
+                if (IsPatternMatched(y, x, pattern))
+                {
+                    matchedPatterns.push_back(
+                        {
+                            y,
+                            x,
+                            pattern.width,
+                            pattern.height,
+                            pattern.reward,
+                            p
+                        });
+                }
     }
 }
 
@@ -504,4 +516,73 @@ ItemEffectContext InGameScene::CollectItemEffects(GameState& state)
             item.effect->Execute(ctx);
 
     return ctx;
+}
+
+void InGameScene::ExecutePatternEvent(const Pattern& pattern,GameState& state)
+{
+    switch (pattern.eventType)
+    {
+    case PatternEventType::Gold:
+    {
+        int patternReward = pattern.reward;
+
+        patternReward += curItemEffects.coin;
+        patternReward +=
+            curItemEffects.comboBonusPerPattern * curPatternIndex;
+
+        patternReward =
+            (int)(patternReward * curItemEffects.multiplier);
+
+        baseReward += patternReward;
+        break;
+    }
+
+    case PatternEventType::SixSeven:
+    {
+        sixSevenCount = 0;
+        isSixSeven = true;
+        lastSixSevenMoveTime = state.curTime;
+
+        ShakeConsoleWindow(20, 1250, 1);
+        SOUND->Play("67");
+
+        slotState = SlotMachineState::SixSeven;
+        break;
+    }
+    }
+}
+
+bool InGameScene::IsPatternMatched(
+    int startY,
+    int startX,
+    const Pattern& pattern)
+{
+    if (pattern.type == PatternType::Same)
+    {
+        return IsSameInArea(
+            startY,
+            startX,
+            pattern.width,
+            pattern.height
+        );
+    }
+
+    if (pattern.type == PatternType::Fixed)
+    {
+        for (int y = 0; y < pattern.height; ++y)
+        {
+            for (int x = 0; x < pattern.width; ++x)
+            {
+                int valueIndex = y * pattern.width + x;
+                int slotValue = slotArr[startY + y][startX + x];
+
+                if (slotValue != pattern.values[valueIndex])
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+    return false;
 }

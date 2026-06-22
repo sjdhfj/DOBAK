@@ -128,9 +128,6 @@
     <ClInclude Include="SceneManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Pattern.h">
-      <Filter>KYM\Header</Filter>
-    </ClInclude>
     <ClInclude Include="ICommand.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -145,6 +142,9 @@
     </ClInclude>
     <ClInclude Include="QuotaScene.h">
       <Filter>AH\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Pattern.h">
+      <Filter>KYM\Header</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

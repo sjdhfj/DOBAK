@@ -13,6 +13,9 @@ int main()
 	SOUND->Load("Drink", "Sound/bloxy-cola.mp3");
 	SOUND->Load("Pop", "Sound/SlotMachineSelect.mp3");
 	SOUND->Load("67", "Sound/67Sound.mp3");
+	SOUND->Load("Rolling", "Sound/SlotRolling.mp3");
+	SOUND->Load("SlotEmission", "SlotEmission.mp3");
+	SOUND->Load("SlotMoney", "SlotMoney.mp3");
 	SOUND->PlayBGM("Sound/f.mp3");
 	while (state.isRunning)
 	{
