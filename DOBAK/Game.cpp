@@ -1,4 +1,4 @@
-#include "Game.h"
+ï»¿#include "Game.h"
 #include "SlotMachineScene.h"
 #include "SoundManager.h"
 #include "Scene.h"
@@ -7,9 +7,11 @@
 #include "SceneManager.h"
 #include "ShopScene.h"
 #include "Commands.h"
+#include "ShopItems.h"
+#include "NextDayScene.h"
+#include "QuotaScene.h"
 void Init(GameState& state)
 {
-	SOUND->PlayBGM("Sound\\candyland (1).mp3");
 	SetConsoleWindowStyle(true);
 	SetConsoleFont(L"NSimSun", { 8, 16 });
 	SOUND->Init();
@@ -18,43 +20,14 @@ void Init(GameState& state)
 	SetCursorVisible(false);
 	SetConsoleMouseInputDisable();
 	state = GameState{};
-
-	state.shopItems = 
-	{
-		{1, "name", "description", 100, ItemType::CONSUME, new AddGoldCommand(10),
-			{
-				" ___ ",
-				"($$$)",
-				" --- "
-			}
-		},
-		{2, "name", "description", 100, ItemType::CONSUME, new AddGoldCommand(10),
-			{
-				" --- ",
-				"|   |",
-				" --- "
-			}
-		},
-		{3, "name", "description", 100, ItemType::CONSUME, new AddGoldCommand(10),
-			{
-				" ___ ",
-				"(¤Ç¤Ç)",
-				" --- "
-			}
-		},
-		{4, "name", "description", 100, ItemType::CONSUME, new AddGoldCommand(10),
-			{
-				" ___ ",
-				"('a')",
-				" --- "
-			}
-		}
-	};
-
+	ShopItemInit(state);
+	state.player.inventory = {};
 	SceneManager::GetInst()->RegisterScene("TitleScene", std::make_unique<TitleScene>());
 	SceneManager::GetInst()->RegisterScene("InfoScene", std::make_unique<InfoScene>());
 	SceneManager::GetInst()->RegisterScene("ShopScene", std::make_unique<ShopScene>());
 	SceneManager::GetInst()->RegisterScene("InGameScene", std::make_unique<InGameScene>());
+	SceneManager::GetInst()->RegisterScene("NextDayScene", std::make_unique<NextDayScene>());
+	SceneManager::GetInst()->RegisterScene("QuotaScene", std::make_unique<QuotaScene>());
 	SceneManager::GetInst()->ChangeScene("TitleScene", state);
 	//Init();
 }

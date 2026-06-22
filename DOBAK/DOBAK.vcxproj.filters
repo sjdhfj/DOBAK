@@ -72,6 +72,15 @@
     <ClCompile Include="Pattern.cpp">
       <Filter>KYM\CPP</Filter>
     </ClCompile>
+    <ClCompile Include="NextDayScene.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ShopItems.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="QuotaScene.cpp">
+      <Filter>AH\CPP</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SoundManager.h">
@@ -127,6 +136,15 @@
     </ClInclude>
     <ClInclude Include="Commands.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="NextDayScene.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ShopItems.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="QuotaScene.h">
+      <Filter>AH\Header</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

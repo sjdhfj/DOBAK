@@ -17,10 +17,12 @@ class InGameScene : public AbstractScene
 	void DrawProbabilityUI(const GameState& state);
 	void DrawSlotMachine();
 	void DrawSlotNumbers();
+	void DrawInventory(const GameState& state);
 	bool IsCurrentPatternCell(int y, int x);
 	void DrawSixSeven();
 	void ClearSixSeven();
 	int CheckPatternReward(const Pattern& pattern);
 	bool IsSameInArea(int startY, int startX, int patternWidth, int patternHeight);
 	void FindMatchedPatterns();
+	ItemEffectContext CollectItemEffects(GameState& state);
 };

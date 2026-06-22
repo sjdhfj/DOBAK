@@ -164,9 +164,6 @@ static int g_originY = 0;
 
 void ShakeConsoleWindow(int intensity, int duration, int interval)
 {
-	// intensity : 얼마나 세게 틀지 쉐이크 강도
-	// duration : 얼마나 오래 흔들지 흔들시간
-	// interval : 한번 흔들고 텀
 
 	HWND hWnd = GetConsoleWindow();
 	RECT windowRect;

@@ -1,18 +1,71 @@
 ﻿#include "ShopScene.h"
-#include <vector>
 #include "UIAsciiObjs.h"
+#include "SoundManager.h"
 constexpr int ShopX = 10;
 constexpr int ShopY = 3;
 constexpr int ListY = ShopY + 6;
 constexpr int ListMax = 6;
 constexpr float SellPricePercent = 0.5f;
 constexpr int ArtX = 55;
-
 constexpr int ItemArtX = ShopX + 37;
-constexpr int ItemArtY = ListY;               
-constexpr int ItemArtWidth = ArtX - ItemArtX; 
+constexpr int ItemArtY = ListY;
+constexpr int ItemArtWidth = ArtX - ItemArtX;
 constexpr int ItemArtHeight = ListMax;
+
 static UIAsciiObjs objs;
+
+static int DisplayWidth(const string& s)
+{
+    int w = 0;
+    for (int i = 0; i < (int)s.size(); )
+    {
+        unsigned char c = (unsigned char)s[i];
+        if (c >= 0x81 && c <= 0xFE && i + 1 < (int)s.size())
+        {
+            w += 2; i += 2;
+        }
+        else
+        {
+            w += 1; i += 1;
+        }
+    }
+    return w;
+}
+
+static vector<string> WrapText(const string& text, int maxWidth)
+{
+    vector<string> lines;
+    string cur;
+    int curW = 0;
+    int i = 0;
+    while (i < (int)text.size())
+    {
+        unsigned char c = (unsigned char)text[i];
+        int charW;
+        string ch;
+        if (c >= 0x81 && c <= 0xFE && i + 1 < (int)text.size())
+        {
+            charW = 2; ch = text.substr(i, 2); i += 2;
+        }
+        else
+        {
+            charW = 1; ch = text.substr(i, 1); i += 1;
+        }
+
+        if (curW + charW > maxWidth)
+        {
+            lines.push_back(cur); cur = ch; curW = charW;
+        }
+        else
+        {
+            cur += ch; curW += charW;
+        }
+    }
+    if (!cur.empty())
+        lines.push_back(cur);
+    return lines;
+}
+
 std::vector<Item>& ShopScene::CurList(GameState& state)
 {
     return (_curTab == ShopTab::BUY) ? _shopItems : state.player.inventory;
@@ -25,20 +78,16 @@ int ShopScene::CurPrice(const Item& item) const
 
 void ShopScene::Init(GameState& state)
 {
+    SOUND->PlayBGM("Sound/candyland.mp3");
     SetConsoleFont(L"NSimSun", { 8, 16 });
     SetConsoleSize(WIDTH, HEIGHT);
     AsciiInit(objs);
     _curTab = ShopTab::BUY;
     _cursor = 0;
-    //SetConsoleSize(WIDTH, HEIGHT);
+    _scrollOffset = 0;
+    _savedCursor[0] = _savedCursor[1] = 0;
+    _savedScroll[0] = _savedScroll[1] = 0;
     _shopItems = state.shopItems;
-
-    state.player.inventory =
-    {
-        { 6767, "676767676767", "676767", 6767 * 2, ItemType::EQUIP},
-        { 67, "67676767", "676767",  67 * 2, ItemType::EQUIP },
-
-    };
     PlayOpenTransition(state, 1);
 }
 
@@ -49,15 +98,23 @@ void ShopScene::Update(GameState& state)
 
     if (GetKeyDown(VK_LEFT) && _curTab == ShopTab::SELL)
     {
+        _savedCursor[1] = _cursor;
+        _savedScroll[1] = _scrollOffset;
         _curTab = ShopTab::BUY;
-        _cursor = 0;
+        _cursor = _savedCursor[0];
+        _scrollOffset = _savedScroll[0];
+        ClampCursorAndScroll((int)CurList(state).size());
         system("cls");
         return;
     }
     if (GetKeyDown(VK_RIGHT) && _curTab == ShopTab::BUY)
     {
+        _savedCursor[0] = _cursor;
+        _savedScroll[0] = _scrollOffset;
         _curTab = ShopTab::SELL;
-        _cursor = 0;
+        _cursor = _savedCursor[1];
+        _scrollOffset = _savedScroll[1];
+        ClampCursorAndScroll((int)CurList(state).size());
         system("cls");
         return;
     }
@@ -79,6 +136,7 @@ void ShopScene::Update(GameState& state)
         {
             if (state.player.gold >= item.price)
             {
+                SOUND->Play("Yeah");
                 state.player.gold -= item.price;
                 state.player.inventory.push_back(item);
                 _isSmiling = true;
@@ -91,9 +149,9 @@ void ShopScene::Update(GameState& state)
             state.player.gold += CurPrice(item);
             list.erase(list.begin() + _cursor);
             _isSelling = true;
+            SOUND->Play("Drink");
             _juiceTimer = state.curTime;
-            _cursor = std::min(_cursor, (int)list.size() - 1);
-            _cursor = std::max(0, _cursor);
+            size = (int)list.size();
         }
     }
 
@@ -102,16 +160,20 @@ void ShopScene::Update(GameState& state)
         PlayCloseTransition(state, 1);
         SceneManager::GetInst()->ChangeScene("InGameScene", state);
     }
+
     if (_isSmiling && state.curTime - _smileTimer > 1000)
         _isSmiling = false;
     if (_isSelling && state.curTime - _juiceTimer > 1000)
         _isSelling = false;
+
     if (state.curTime - _sixSevenTimer > 100)
     {
         std::rotate(objs.shopSix.begin(), objs.shopSix.begin() + 1, objs.shopSix.end());
         std::rotate(objs.shopSeven.rbegin(), objs.shopSeven.rbegin() + 1, objs.shopSeven.rend());
         _sixSevenTimer = state.curTime;
     }
+
+    ClampCursorAndScroll(size);
     UpdateShakeConsoleWindow();
 }
 
@@ -123,9 +185,9 @@ void ShopScene::Render(const GameState& state)
     SetColor();
     GotoXY(x, res.Y - 1);
     cout << esc;
-    SetColor();
-    auto noConststate = state;
-    const auto& list = CurList(noConststate);
+
+    auto noConstState = state;
+    const auto& list = CurList(noConstState);
 
     GotoXY(ShopX, ShopY);
     SetColor(Color::LIGHT_YELLOW);
@@ -144,14 +206,15 @@ void ShopScene::Render(const GameState& state)
 
     for (int i = 0; i < ListMax; ++i)
     {
+        int idx = _scrollOffset + i;
         GotoXY(ShopX, ListY + i);
-        if (i < (int)list.size())
+        if (idx < (int)list.size())
         {
-            bool sel = (i == _cursor);
+            bool sel = (idx == _cursor);
             SetColor(sel ? Color::WHITE : Color::LIGHT_GRAY);
             cout << (sel ? "> " : "  ");
-            cout << std::left << std::setw(20) << list[i].name;
-            cout << std::right << std::setw(6) << CurPrice(list[i]) << "G";
+            cout << std::left << std::setw(20) << list[idx].name;
+            cout << std::right << std::setw(6) << CurPrice(list[idx]) << "G";
         }
         else
         {
@@ -164,32 +227,48 @@ void ShopScene::Render(const GameState& state)
     SetColor();
     DrawLine('-', 35);
 
-    GotoXY(ShopX, ListY + ListMax + 2);
-    SetColor(Color::CYAN);
-    if (!list.empty())
-        cout << std::left << std::setw(35) << list[_cursor].description;
-    else
-        cout << std::setw(35) << "";
+        vector<string> descLines;
+        if (!list.empty())
+            descLines = WrapText(list[_cursor].description, DescWidth);
+
+        for (int i = 0; i < DescLines; ++i)
+        {
+            GotoXY(ShopX, ListY + ListMax + 2 + i);
+            SetColor(Color::CYAN);
+            if (i < (int)descLines.size())
+            {
+                const string& line = descLines[i];
+                cout << line;
+                int remain = DescWidth - DisplayWidth(line);
+                if (remain > 0) cout << string(remain, ' ');
+            }
+            else
+            {
+                cout << string(DescWidth, ' ');
+            }
+        }
+
     if (!list.empty())
         RenderItemArt(list[_cursor]);
-    GotoXY(ShopX, ListY + ListMax + 4);
+
+    GotoXY(ShopX, ListY + ListMax + 2 + DescLines + 1);
     SetColor(Color::LIGHT_YELLOW);
     cout << "Gold: " << std::left << std::setw(10) << state.player.gold << "G";
 
     SetColor();
-    
     int y = 1;
-    const auto& man = _isSelling ? objs.shopjuicemen : (_isSmiling ? objs.shophappymen : objs.shopmen);
-    SetColor();
-    for (auto& i : man)
+    const auto& man = _isSelling ? objs.shopjuicemen
+        : (_isSmiling ? objs.shophappymen : objs.shopmen);
+    for (auto& row : man)
     {
         GotoXY(ArtX, y++);
         SetColor();
-        cout << i;
+        cout << row;
     }
-    //SetUniCodeMode();
+
     RenderSixSeven(state);
 }
+
 void ShopScene::RenderSixSeven(const GameState& state)
 {
     COORD res = GetConsoleResolution();
@@ -198,35 +277,27 @@ void ShopScene::RenderSixSeven(const GameState& state)
     int sixWidth = 0;
     for (auto& i : objs.shopSix)
         sixWidth = std::max(sixWidth, (int)i.size());
-    int sevenWidth = 0;
-    for (auto& i : objs.shopSeven)
-        sevenWidth = std::max(sevenWidth, (int)i.size());
 
     SetUniCodeMode();
-
     int y = 1;
     for (auto& i : objs.shopSix)
     {
-        if (IsGotoXY(x, y++))
-            wcout << i;
+        if (IsGotoXY(x, y++)) wcout << i;
     }
-
     y = 1;
     for (auto& i : objs.shopSeven)
     {
-        if (IsGotoXY(x + sixWidth, y++))
-            wcout << i;
+        if (IsGotoXY(x + sixWidth, y++)) wcout << i;
     }
-
     SetDefaultMode();
 }
-void ShopScene::PlayOpenTransition(const GameState& state, unsigned long  delaymilisecond)
+
+void ShopScene::PlayOpenTransition(const GameState& state, unsigned long delaymilisecond)
 {
     COORD res = GetConsoleResolution();
     int W = res.X;
     int H = res.Y;
     int half = W / 2;
-    unsigned long delayMs = delaymilisecond;
     int colorCount = (int)Color::END;
 
     for (int row = 0; row < H; ++row)
@@ -234,10 +305,10 @@ void ShopScene::PlayOpenTransition(const GameState& state, unsigned long  delaym
         Color c = (Color)std::min((int)(((float)row / H) * colorCount), colorCount - 1);
         SetColor(c, c);
         GotoXY(0, row);
-        for (int x = 0; x < W; ++x)
-            cout << " ";
-        Sleep(delayMs);
+        for (int x = 0; x < W; ++x) cout << " ";
+        Sleep(delaymilisecond);
     }
+
     SetColor();
     for (int x = 0; x < W; ++x)
     {
@@ -246,53 +317,48 @@ void ShopScene::PlayOpenTransition(const GameState& state, unsigned long  delaym
         SetColor(c, c);
         for (int y = 0; y < H; ++y)
         {
-            GotoXY(x, y);
-            cout << " ";
+            GotoXY(x, y); cout << " ";
         }
     }
+
     for (int step = 0; step < half; ++step)
     {
-        int leftX = half - 1 - step; 
+        int leftX = half - 1 - step;
         int rightX = half + step;
-
         for (int y = 0; y < H; ++y)
         {
-            GotoXY(leftX, y);
-            cout << " ";
-            GotoXY(rightX, y);
-            cout << " ";
+            GotoXY(leftX, y); cout << " ";
+            GotoXY(rightX, y); cout << " ";
         }
-        Sleep(delayMs);
+        Sleep(delaymilisecond);
     }
+
     SetColor();
     Render(state);
 }
 
-void ShopScene::PlayCloseTransition(const GameState& state, unsigned long  delayMilisecond)
+void ShopScene::PlayCloseTransition(const GameState& state, unsigned long delayMilisecond)
 {
     COORD res = GetConsoleResolution();
     int W = res.X;
     int H = res.Y;
     int half = W / 2;
-    unsigned long  delayMs = delayMilisecond;
     int colorCount = (int)Color::END;
 
     for (int step = 1; step <= half; ++step)
     {
         Color c = (Color)std::min((int)(((float)step / half) * colorCount), colorCount - 1);
         SetColor(c, c);
-
         for (int y = 0; y < H; ++y)
         {
-            GotoXY(step - 1, y);
-            cout << " ";
-            GotoXY(W - step, y);
-            cout << " ";
+            GotoXY(step - 1, y); cout << " ";
+            GotoXY(W - step, y); cout << " ";
         }
-        Sleep(delayMs);
+        Sleep(delayMilisecond);
     }
     SetColor();
 }
+
 void ShopScene::RenderItemArt(const Item& item)
 {
     SetColor();
@@ -304,4 +370,20 @@ void ShopScene::RenderItemArt(const Item& item)
         else
             cout << std::setw(ItemArtWidth) << "";
     }
+}
+
+void ShopScene::ClampCursorAndScroll(int size)
+{
+    if (size <= 0)
+    {
+        _cursor = 0;
+        _scrollOffset = 0;
+        return;
+    }
+    _cursor = std::max(0, std::min(_cursor, size - 1));
+    if (_cursor < _scrollOffset)
+        _scrollOffset = _cursor;
+    if (_cursor >= _scrollOffset + ListMax)
+        _scrollOffset = _cursor - ListMax + 1;
+    _scrollOffset = std::max(0, std::min(_scrollOffset, std::max(0, size - ListMax)));
 }
