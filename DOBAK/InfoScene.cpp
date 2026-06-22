@@ -5,6 +5,7 @@ constexpr float step = 0.01f;
 
 void InfoScene::Init(GameState& state)
 {
+    SOUND->PlayBGM("Sound/i.mp3");
     SetConsoleSize(WIDTH, HEIGHT);
     _curTab = InfoTab::INFO;
     _cursor = 0;

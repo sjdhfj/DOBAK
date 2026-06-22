@@ -58,7 +58,7 @@ void QuotaScene::Render(const GameState& state)
     if (state.quotaMet)
     {
         SetColor(Color::LIGHT_GREEN);
-        cout << "★ 할당량 달성! ★              ";
+        cout << "★ 할당량 달성! ★";
     }
     else
     {

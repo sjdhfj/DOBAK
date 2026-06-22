@@ -3,8 +3,7 @@
 static UIAsciiObjs objs;
 void TitleScene::Init(GameState& state)
 {
-	SOUND->StopBGM();
-	SOUND->PlayBGM("Sound/a.mp3");
+	SOUND->PlayBGM("Sound/g.mp3");
 	AsciiInit(objs);
 	SetConsoleSize(80, 40);
 }
