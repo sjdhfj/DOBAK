@@ -14,7 +14,9 @@ class InGameScene : public AbstractScene
 	void Update(GameState& state);
 	void Render(const GameState& state);
 	void DrawUI(const GameState& state);
+	void DrawPlusGold();
 	void DrawProbabilityUI(const GameState& state);
+	void DrawInventoryUI(GameState& state);
 	void DrawSlotMachine();
 	void DrawSlotNumbers();
 	bool IsCurrentPatternCell(int y, int x);

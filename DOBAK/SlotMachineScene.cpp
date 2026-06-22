@@ -83,6 +83,7 @@ void InGameScene::Init(GameState& state)
 	}
 
 	DrawProbabilityUI(state);
+	DrawInventoryUI(state);
 }
 void InGameScene::Update(GameState& state)
 {
@@ -194,6 +195,7 @@ void InGameScene::Update(GameState& state)
 	}
 
 	UpdateShakeConsoleWindow();
+	DrawPlusGold();
 }
 void InGameScene::Render(const GameState& state)
 {
@@ -212,19 +214,48 @@ void InGameScene::DrawUI(const GameState& state)
 	cout << "Coin:" << state.player.gold;
 }
 
+
+void InGameScene::DrawPlusGold()
+{
+	if ()
+
+	int startYPos = slotY - 4;
+	int startXPos = slotX - 3;
+	GotoXY(startXPos, startYPos);
+	cout << "샌즈";
+}
+
 void InGameScene::DrawProbabilityUI(const GameState& state)
 {
 	COORD res = GetConsoleResolution();
 	int panelStartPos = res.X - asciiArts.probabilityPanel[0].length();;
 	GotoXY(panelStartPos, 0);
 	wcout << asciiArts.probabilityPanel[0];
-	for (int i = 0; i < res.Y - 2; ++i)
+	for (int i = 0; i < res.Y - 1; ++i)
 	{
-		GotoXY(panelStartPos, 0 + i);
-		wcout << asciiArts.probabilityPanel[i];
+		GotoXY(panelStartPos, 1 + i);
+		wcout << asciiArts.probabilityPanel[1];
 	}
-	GotoXY(panelStartPos, 0);
+	GotoXY(panelStartPos, res.Y-1);
 	wcout << asciiArts.probabilityPanel[2];
+}
+
+void InGameScene::DrawInventoryUI(GameState& state)
+{
+	COORD res = GetConsoleResolution();
+	int startX = res.X - ((asciiArts.probabilityPanel[0].length() / 2) + (asciiArts.probabilityPanel[0].length() / 3));
+
+	int startY = 0;
+
+	for (int i = 0; i < state.player.inventory.size(); ++i)
+	{
+		for (int j = 0; j < state.player.inventory[i].art.size(); ++j)
+		{
+			startY++;
+			GotoXY(startX, startY);
+			cout << state.player.inventory[i].art[j];
+		}
+	}
 }
 
 void InGameScene::DrawSlotMachine()
