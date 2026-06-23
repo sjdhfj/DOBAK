@@ -2,26 +2,25 @@
 #include "SceneManager.h"
 constexpr int DaysPerWeek = 3;
 constexpr int TotalWeeks = 67;
-constexpr int MaxQuotaFails = 3;
+constexpr int MaxQuotaFails = 1;
 
 void NextDayScene::Init(GameState& state)
 {
     _goldDiff = state.player.gold - state.goldAtDayStart;
-    state.day++;
     state.dailySpinCount = 0;
     state.quotaSubmitted = false;
+    bool wasWeekEnd = state.quotaFromDayEnd;
     state.quotaFromDayEnd = false;
     state.goldAtDayStart = state.player.gold;
 
-    if (state.day % DaysPerWeek == 0)
+    if (wasWeekEnd)
     {
         state.week++;
 
-        bool met = state.quotaMet;
-
-        if (!met)
+        if (!state.quotaMet)
         {
-            long long shortfall = std::max<long long>(0, state.dailyQuota - state.player.gold);
+            long long shortfall = std::max<long long>(
+                0, (long long)state.dailyQuota - state.player.gold);
             state.carryOverQuota += shortfall;
             state.quotaFailCount++;
 
@@ -29,6 +28,8 @@ void NextDayScene::Init(GameState& state)
             {
                 state.isWinEnding = false;
                 state.requestEndGame = true;
+                PlayOpenTransition(state, 1);
+                return;
             }
         }
         else
@@ -42,19 +43,17 @@ void NextDayScene::Init(GameState& state)
             {
                 state.isWinEnding = true;
                 state.requestEndGame = true;
+                PlayOpenTransition(state, 1);
+                return;
             }
-            else
-            {
-                state.baseQuota = CalcQuotaForWeek(state.week, 10);
-                state.dailyQuota = state.baseQuota + state.carryOverQuota;
-                state.quotaMet = false;
-            }
+            state.baseQuota = CalcQuotaForWeek(state.week, 10);   // ★ 10으로 통일
+            state.dailyQuota = state.baseQuota + state.carryOverQuota;
+            state.quotaMet = false;
         }
     }
 
     PlayOpenTransition(state, 1);
 }
-
 void NextDayScene::Update(GameState& state)
 {
     if (GetKeyDown(VK_RETURN) || GetKeyDown(VK_SPACE))

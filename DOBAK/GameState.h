@@ -14,7 +14,7 @@ constexpr int HEIGHT = 45;
 struct PlayerData
 {
 	std::vector<Item> inventory;
-	long long gold = 0; // ULONGLONG -> long long : 음수 비교/연산이 정상 동작하도록 변경
+	long long gold = 0;
 };
 struct GameState
 {

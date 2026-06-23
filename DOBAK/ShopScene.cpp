@@ -88,7 +88,7 @@ void ShopScene::Init(GameState& state)
     _savedCursor[0] = _savedCursor[1] = 0;
     _savedScroll[0] = _savedScroll[1] = 0;
     _shopItems = state.shopItems;
-    PlayOpenTransition(state, 1);
+    PlayOpenTransition(state, .8f);
 }
 
 void ShopScene::Update(GameState& state)

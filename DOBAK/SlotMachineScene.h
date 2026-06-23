@@ -28,6 +28,7 @@ class InGameScene : public AbstractScene
 	void ExecutePatternEvent(const Pattern& pattern, GameState& state);
 	ItemEffectContext CollectItemEffects(GameState& state);
 	void DrawEffectNotice();
+	void DrawDayInfo(const GameState& state);
 	string _lastEffectStr = "";
 	Color  _lastEffectColor = Color::WHITE;
 };

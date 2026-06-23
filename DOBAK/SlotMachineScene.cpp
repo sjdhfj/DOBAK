@@ -72,8 +72,10 @@ static void OnSpinComplete(GameState& state)
     if (state.dailySpinCount >= SpinsPerDay)
     {
         state.dailySpinCount = 0;
+        bool isWeekEndDay = (state.day % DaysPerWeek == 0); // day++ 전, 끝낸 날 기준
+        state.day++;
 
-        if (state.day % DaysPerWeek == 0)
+        if (isWeekEndDay)
         {
             state.quotaFromDayEnd = true;
             state.requestQuotaCheck = true;
@@ -172,13 +174,10 @@ void InGameScene::Init(GameState& state)
 void InGameScene::Update(GameState& state)
 {
     cheater.Update(state);
-
-    if (GetKeyDown('B'))
-        SceneManager::GetInst()->ChangeScene("ShopScene", state);
-    if (GetKeyDown('G'))
+    if (GetKeyDown('G') && slotState == SlotMachineState::Idle && !isSixSeven)
         SceneManager::GetInst()->ChangeScene("QuotaScene", state);
-    if (GetKeyDown('Q'))
-        SceneManager::GetInst()->ChangeScene("EndingScene", state);
+    if (GetKeyDown('B') && slotState == SlotMachineState::Idle && !isSixSeven)
+        SceneManager::GetInst()->ChangeScene("ShopScene", state);
 
     if (GetKeyDown(VK_SPACE) && slotState == SlotMachineState::Idle)
     {
@@ -356,6 +355,7 @@ void InGameScene::Render(const GameState& state)
     DrawSixSeven();
     DrawPlusGold();
     DrawPatternValuePanel(state);
+    DrawDayInfo(state);
 
     COORD res = GetConsoleResolution();
     int cheatY = res.Y - 1;
@@ -373,17 +373,17 @@ void InGameScene::Render(const GameState& state)
 void InGameScene::DrawEffectNotice()
 {
     int noticeX = titleX;
-    int noticeY = titleY + (int)asciiArts.slotMachine.size();
+    int noticeY = titleY + (int)asciiArts.slotMachine.size() + 3;
 
     GotoXY(noticeX, noticeY);
-    cout << string(55, ' ');
+    cout << string(60, ' ');
 
     if (_lastEffectStr.empty()) return;
 
-    if (slotState == SlotMachineState::Blinking && isPatternBlink)
+    /*if (slotState == SlotMachineState::Blinking && isPatternBlink)
         SetColor(Color::BLACK, _lastEffectColor);
-    else
-        SetColor(_lastEffectColor);
+    else*/
+        SetColor(Color::CYAN);
 
     GotoXY(noticeX, noticeY);
     cout << " " << _lastEffectStr << " ";
@@ -730,10 +730,13 @@ void InGameScene::ExecutePatternEvent(const Pattern& pattern, GameState& state)
         }
 
         float globalMult = curItemEffects.multiplier;
-        if (!std::isfinite(globalMult) || globalMult <= 0.0f) globalMult = 1.0f;
-        if (!std::isfinite(patternMult) || patternMult <= 0.0f) patternMult = 1.0f;
-        globalMult = std::min(globalMult, 67.0f);
-        patternMult = std::min(patternMult, 67.0f);
+        if (std::isnan(globalMult) || globalMult <= 0.0f) globalMult = 1.0f;
+        else if (!std::isfinite(globalMult)) globalMult = 67.0f;
+        else globalMult = std::min(globalMult, 67.0f);
+
+        if (std::isnan(patternMult) || patternMult <= 0.0f) patternMult = 1.0f;
+        else if (!std::isfinite(patternMult)) patternMult = 67.0f;
+        else patternMult = std::min(patternMult, 67.0f);
 
         patternReward = (long long)(patternReward * patternMult);
         patternReward = (long long)(patternReward * globalMult);
@@ -761,7 +764,20 @@ void InGameScene::ExecutePatternEvent(const Pattern& pattern, GameState& state)
     }
     }
 }
+void InGameScene::DrawDayInfo(const GameState& state)
+{
+    COORD res = GetConsoleResolution();
+    string dayStr = std::to_string(state.day) + "일째";
+    int x = res.X - (int)dayStr.size() - 1;
+    int y = res.Y - 2;
 
+    GotoXY(x, y);
+    cout << string(15, ' ');
+    GotoXY(x, y);
+    SetColor(Color::LIGHT_GRAY);
+    cout << dayStr;
+    SetColor();
+}
 bool InGameScene::IsPatternMatched(int startY, int startX, const Pattern& pattern)
 {
     if (pattern.type == PatternType::Same)

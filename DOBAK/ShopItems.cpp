@@ -5,10 +5,6 @@ void ShopItemInit(GameState& state)
 {
     state.shopItems =
     {
-        // ── 테스트 ──────────────────────────────────────────────
-        { 1, "name", "description", 100, ItemType::CONSUME,
-          new AddGoldCommand(10),
-          { " ___ ", "($$$)", " --- " } },
 
           // ── 67 골드 계열 ─────────────────────────────────────────
           { 6701, "67 부적",
@@ -82,10 +78,9 @@ void ShopItemInit(GameState& state)
                 new SpinSpeedCommand(34) }),
             { " ___ ", "(M67)", " --- " } },
 
-            // ── 67 배율 계열 ─────────────────────────────────────────
             { 6705, "전설의 6.7배율기",
               "보상 배율 x6.7. 전설로만 전해지던 그 배율이 실존했다.",
-              670, ItemType::EQUIP, new MultiplierGoldCommand(6.7f),
+              67000, ItemType::EQUIP, new MultiplierGoldCommand(6.7f),
               { " ___ ", "(6.7)", " --- " } },
 
             { 6712, "67배의 도박",
@@ -117,7 +112,6 @@ void ShopItemInit(GameState& state)
                   new ConsolationGoldCommand(-20) }),
               { " ___ ", "(G67)", " --- " } },
 
-              // ── 67 위로금 계열 ───────────────────────────────────────
               { 6707, "67의 위로상",
                 "꽝이어도 위로금 +67G. 67이 패배자에게도 손을 내민다.",
                 134, ItemType::EQUIP, new ConsolationGoldCommand(67),
@@ -144,7 +138,6 @@ void ShopItemInit(GameState& state)
                     new ComboBonusCommand(-7) }),
                 { " ___ ", "(0_0)", " --- " } },
 
-                // ── 67 속도 계열 ─────────────────────────────────────────
                 { 6708, "초고속 릴 67",
                   "스핀 속도 +670ms 단축. 릴이 0.67초 더 빨리 멈춘다.",
                   201, ItemType::EQUIP, new SpinSpeedCommand(670),
@@ -173,7 +166,6 @@ void ShopItemInit(GameState& state)
                   603, ItemType::EQUIP, new SpinSpeedCommand(1200),
                   { " ___ ", "(!67)", " --- " } },
 
-                  // ── 67 콤보 계열 ─────────────────────────────────────────
                   { 6733, "67 콤보 부스터",
                     "패턴 하나 추가될 때마다 +67G 콤보 보너스.",
                     268, ItemType::EQUIP, new ComboBonusCommand(67),
@@ -214,7 +206,6 @@ void ShopItemInit(GameState& state)
                       6700, ItemType::EQUIP, new PatternSizeBonusCommand(67),
                       { " ___ ", "(W67)", " --- " } },
 
-                      // ── 67 전설 ──────────────────────────────────────────────
                       { 6767, "67의 만능 인장",
                         "+67G, 배율 x1.67, 위로금 +67G, 속도 +67ms, 칸당 +6G. 67의 모든 것.",
                         6767, ItemType::EQUIP,
@@ -226,7 +217,6 @@ void ShopItemInit(GameState& state)
                             new PatternSizeBonusCommand(6) }),
                         { " ___ ", "(67∞)", " --- " } },
 
-                        // ── 67 패턴 특화 계열 ────────────────────────────────────
                         { 7001, "67의 가로신",
                           "3x1 가로 패턴 보상 x2. 67이 가로줄에 강림했다.",
                           250, ItemType::EQUIP,

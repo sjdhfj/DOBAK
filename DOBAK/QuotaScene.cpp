@@ -1,5 +1,6 @@
 ﻿#include "QuotaScene.h"
 #include <cmath>
+#include "SoundManager.h"
 
 constexpr int PanelW = 44;
 constexpr int BarW = 16;
@@ -92,22 +93,32 @@ static long long CalcNextQuota(const GameState& state)
 
 void QuotaScene::Init(GameState& state)
 {
+    SOUND->PlayBGM("Sound/e.mp3");
     state.quotaMet = (state.player.gold >= state.dailyQuota);
     PlayOpenTransition(state, .5f);
 }
 
 void QuotaScene::Update(GameState& state)
 {
-    state.quotaMet = (state.player.gold >= state.dailyQuota);
+    state.quotaMet = (state.player.gold >= (int)state.dailyQuota);
 
-    if (!state.quotaSubmitted && (GetKeyDown(VK_RETURN) || GetKeyDown(VK_SPACE)))
+    if (!state.quotaSubmitted && (GetKeyDown(VK_RETURN) ))
     {
         state.quotaSubmitted = true;
         PlaySubmitAnimation(state);
         PlayCloseTransition(state, 1);
+
+        if (state.quotaFromDayEnd && !state.quotaMet)
+        {
+            state.isWinEnding = false;
+            state.requestEndGame = true;
+            return;
+        }
+
         state.requestNextDay = true;
         return;
     }
+
     if (!state.quotaFromDayEnd && GetKeyDown(VK_ESCAPE))
     {
         PlayCloseTransition(state, 1);
