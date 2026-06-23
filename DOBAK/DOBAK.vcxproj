@@ -129,8 +129,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Cheater.cpp" />
     <ClCompile Include="Console.cpp" />
+    <ClCompile Include="FireWork.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="EndingScene.cpp" />
+    <ClCompile Include="GameOverEffect.cpp" />
     <ClCompile Include="InfoScene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="AsciiArt.cpp" />
@@ -146,13 +150,17 @@
     <ClCompile Include="UIAsciiObjs.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Cheater.h" />
     <ClInclude Include="Commands.h" />
     <ClInclude Include="Console.h" />
     <ClInclude Include="Defines.h" />
     <ClInclude Include="AsciiArt.h" />
     <ClInclude Include="Enums.h" />
+    <ClInclude Include="FireWork.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GameOverEffect.h" />
     <ClInclude Include="GameState.h" />
+    <ClInclude Include="EndingScene.h" />
     <ClInclude Include="ICommand.h" />
     <ClInclude Include="InfoScene.h" />
     <ClInclude Include="Item.h" />

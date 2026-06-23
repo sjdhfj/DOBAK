@@ -18,11 +18,13 @@ struct UIAsciiObjs
     vector<wstring> shopSeven;
 
     vector<string> shopmen;
+    vector<string> shopangrymen;
     vector<string> shophappymen;
     vector<string> shopjuicemen;
-
+    
     vector<wstring> titleascii;
-
+    vector<wstring> endingascii;
+    vector<wstring> gameoverascii;
     int sixOffset = 0;
     int sevenOffset = 0;
 };
@@ -30,7 +32,7 @@ struct UIAsciiObjs
 void AsciiInit(UIAsciiObjs& objs);
 void AsciiUpdate(UIAsciiObjs& objs);
 void AsciiRender(const UIAsciiObjs& objs, const vector<ExcludeRect>& excludeRects = {});
-void DrawTitle(const UIAsciiObjs& objs);
 void DrawRowExcluding(const string& fullLine, int y, int width,
     const vector<ExcludeRect>& excludeRects);
+void DrawTitle(const UIAsciiObjs& objs);
 string BuildTiledLine(const string& pattern, int offset, int width);

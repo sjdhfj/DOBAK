@@ -10,7 +10,6 @@ void TitleScene::Init(GameState& state)
 void TitleScene::Update(GameState& state)
 {
 	AsciiUpdate(objs);
-	// 키입력 화살표 왔다갔다
 	if (GetKeyDown(VK_UP))
 	{
 		_curMenu = (Menu)std::max((int)Menu::START, (int)_curMenu - 1);

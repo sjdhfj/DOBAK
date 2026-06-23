@@ -1,6 +1,12 @@
 #pragma once
 #include <vector>
-
+struct PatternBonus
+{
+    int   targetWidth;
+    int   targetHeight;
+    float multiplier = 1.0f;
+    int   flatBonus = 0;
+};
 struct ItemEffectContext
 {
     int   coin = 0;
@@ -9,6 +15,7 @@ struct ItemEffectContext
     int   consolationGold = 0;
     int   spinSpeedBonus = 0;
     int   comboBonusPerPattern = 0;
+    std::vector<PatternBonus> patternBonuses;
 };
 
 class ICommand

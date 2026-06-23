@@ -10,6 +10,7 @@
 #include "ShopItems.h"
 #include "NextDayScene.h"
 #include "QuotaScene.h"
+#include "EndingScene.h"
 void Init(GameState& state)
 {
 	SetConsoleWindowStyle(true);
@@ -28,6 +29,7 @@ void Init(GameState& state)
 	SceneManager::GetInst()->RegisterScene("InGameScene", std::make_unique<InGameScene>());
 	SceneManager::GetInst()->RegisterScene("NextDayScene", std::make_unique<NextDayScene>());
 	SceneManager::GetInst()->RegisterScene("QuotaScene", std::make_unique<QuotaScene>());
+	SceneManager::GetInst()->RegisterScene("EndingScene", std::make_unique<EndingScene>());
 	SceneManager::GetInst()->ChangeScene("TitleScene", state);
 	//Init();
 }

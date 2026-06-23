@@ -63,7 +63,7 @@ void SetConsoleSize(int width, int height)
 
 	//뷰포트
 	//int arr[10] = {1,12,3,4,5,,6,,7,8}
-	SMALL_RECT rect = {0,0,1,1};
+	SMALL_RECT rect = { 0,0,1,1 };
 	SetConsoleWindowInfo(handle, true, &rect);
 	// 버퍼
 	COORD size = { (short)width, (short)height };
@@ -72,11 +72,11 @@ void SetConsoleSize(int width, int height)
 	rect.Right = width - 1;
 	rect.Bottom = height - 1;
 	SetConsoleWindowInfo(handle, true, &rect);
-	
+
 	//Sleep(100);
 	//가운데 설정
 	HWND hWnd = GetConsoleWindow();
-	
+
 	//RECT windowRect;
 	//GetWindowRect(hWnd, &windowRect);
 	//int windowWidth = windowRect.right - windowRect.left;
@@ -101,7 +101,7 @@ void SetConsoleFullScreen()
 
 	SetConsoleDisplayMode(handle,
 		CONSOLE_FULLSCREEN_MODE, 0);
-	
+
 	int width = GetSystemMetrics(SM_CXSCREEN) / fontInfo.dwFontSize.X;
 	int height = GetSystemMetrics(SM_CYSCREEN) / fontInfo.dwFontSize.Y;
 	SetConsoleSize(width, height);
@@ -112,10 +112,10 @@ void SetConsoleSettings(int width, int height, bool isFullScreen, const wstring&
 	//타이틀 설정
 	//system("");
 	SetConsoleTitle(title.c_str());
-	
+
 	HWND hWnd = GetConsoleWindow();
 	//창 설정
-	if(isFullScreen)
+	if (isFullScreen)
 	{
 		ShowWindow(hWnd, SW_MAXIMIZE);
 	}
@@ -211,6 +211,81 @@ void UpdateShakeConsoleWindow()
 	}
 }
 
+static bool g_isShrinking = false;
+static bool g_shrinkFinished = false;
+static float g_shrinkDuration = 0;
+static float g_shrinkMinScale = 0.05f;
+static ULONGLONG g_shrinkStartTime = 0;
+
+static int g_shrinkOriginX = 0;
+static int g_shrinkOriginY = 0;
+static int g_shrinkOriginWidth = 0;
+static int g_shrinkOriginHeight = 0;
+
+void StartConsoleShrink(int durationMs, float minScale)
+{
+	HWND hWnd = GetConsoleWindow();
+	RECT windowRect;
+	GetWindowRect(hWnd, &windowRect);
+
+	g_shrinkOriginX = windowRect.left;
+	g_shrinkOriginY = windowRect.top;
+	g_shrinkOriginWidth = windowRect.right - windowRect.left;
+	g_shrinkOriginHeight = windowRect.bottom - windowRect.top;
+
+	g_shrinkDuration = (float)durationMs;
+	g_shrinkMinScale = minScale;
+	g_shrinkStartTime = GetTickCount64();
+	g_isShrinking = true;
+	g_shrinkFinished = false;
+}
+
+void UpdateConsoleShrink()
+{
+	if (!g_isShrinking)
+		return;
+
+	ULONGLONG curTime = GetTickCount64();
+	float elapsed = (float)(curTime - g_shrinkStartTime);
+	float t = elapsed / g_shrinkDuration;
+
+	if (t >= 1.0f)
+	{
+		t = 1.0f;
+		g_isShrinking = false;
+		g_shrinkFinished = true;
+	}
+
+	float easedT = t * t;
+	float scale = 1.0f - (1.0f - g_shrinkMinScale) * easedT;
+
+	int newWidth = (int)(g_shrinkOriginWidth * scale);
+	int newHeight = (int)(g_shrinkOriginHeight * scale);
+
+	int centerX = g_shrinkOriginX + g_shrinkOriginWidth / 2;
+	int centerY = g_shrinkOriginY + g_shrinkOriginHeight / 2;
+	int newX = centerX - newWidth / 2;
+	int newY = centerY - newHeight / 2;
+
+	HWND hWnd = GetConsoleWindow();
+	SetWindowPos(hWnd, nullptr, newX, newY, newWidth, newHeight, SWP_NOZORDER);
+}
+
+bool IsConsoleShrinkFinished()
+{
+	return g_shrinkFinished;
+}
+
+void RestoreConsoleWindowSize()
+{
+	HWND hWnd = GetConsoleWindow();
+	SetWindowPos(hWnd, nullptr,
+		g_shrinkOriginX, g_shrinkOriginY,
+		g_shrinkOriginWidth, g_shrinkOriginHeight,
+		SWP_NOZORDER);
+	g_shrinkFinished = false;
+}
+
 void GotoXY(int x, int y)
 {
 	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -250,9 +325,9 @@ void SetColor(Color textColor, Color bgColor)
 	int bg = (int)bgColor;
 	SetConsoleTextAttribute(handle, (bg << 4) | text);
 }
- 
+
 void DrawBar(int x, int y, const string& label,
-	int value, int maxValue, int barWidth, 
+	int value, int maxValue, int barWidth,
 	const string& fillChar, const string& emptyChar)
 {
 	Color color;
@@ -273,7 +348,7 @@ void DrawBar(int x, int y, const string& label,
 
 	//10칸 value = 60 / maxValue = 100
 	int filledCount = barWidth * value / maxValue;
-	for (int i = 0; i < barWidth ; ++i)
+	for (int i = 0; i < barWidth; ++i)
 		cout << ((i < filledCount) ? fillChar : emptyChar);
 
 	SetColor();
@@ -285,7 +360,6 @@ void DrawBar(int x, int y, const string& label,
 
 void DrawLine(char ch, int width)
 {
-	//setw(): 한번에 끝
 	//setfill(): 한번하면 계속
 	cout << std::setfill(ch) << std::setw(width) << "" << std::setfill(' ');
 }
@@ -295,7 +369,7 @@ bool GetKey(int vKey)
 	return GetAsyncKeyState(vKey) & 0x8000;
 }
 
-constexpr int KEY_COUNT = 256; 
+constexpr int KEY_COUNT = 256;
 static bool prevDown[KEY_COUNT] = {};
 static bool curDown[KEY_COUNT] = {};
 bool GetKeyDown(int vKey)
@@ -335,12 +409,12 @@ POINT GetMouseCellPosition()
 	GetCursorPos(&pt);
 	HWND hWnd = GetConsoleWindow();
 	ScreenToClient(hWnd, &pt);
-	
+
 	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
 	CONSOLE_FONT_INFOEX fontInfo = { sizeof(CONSOLE_FONT_INFOEX) };
 	GetCurrentConsoleFontEx(handle, false, &fontInfo);
 
-	POINT cellPos = {pt.x / fontInfo.dwFontSize.X,
+	POINT cellPos = { pt.x / fontInfo.dwFontSize.X,
 						pt.y / fontInfo.dwFontSize.Y };
 	return cellPos;
 }
