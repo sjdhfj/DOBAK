@@ -15,7 +15,7 @@ void Cheater::CheckActivateInput()
 {
 	bool comboHeld = GetKey(VK_CONTROL) && GetKey(VK_MENU) && GetKey(VK_SHIFT);
 	if (comboHeld && GetKeyDown('C'))
-		m_isActive = !m_isActive;
+		m_isActive = !m_isActive; 
 }
 
 void Cheater::CheckCheatInput(GameState& state)
