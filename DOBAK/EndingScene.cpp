@@ -1,5 +1,6 @@
 #include "EndingScene.h"
 #include "Console.h"
+#include "SceneManager.h"
 #include <algorithm>
 #include "UIAsciiObjs.h"
 #include "SoundManager.h"
@@ -7,13 +8,16 @@ static UIAsciiObjs objs;
 constexpr int SWAP_INTERVAL_MS = 1000;
 constexpr int RIGHT_MARGIN = 4;
 constexpr size_t MAX_PARTICLES = 400;
-constexpr int LOSE_SHRINK_DURATION_MS = 900; // 콘솔창이 작아지는 데 걸리는 시간
+constexpr int LOSE_SHRINK_DURATION_MS = 900; 
+constexpr int LOSE_BURST_TOTAL = 3;          
+constexpr int LOSE_BURST_INTERVAL_MS = 500;  
 int endingTitleWidth = 0;
 int endingTitleHeight = 0;
 int gameoverasciiHeight = 0;
 int gameoverasciiWidth = 0;
 void DrawEndingTitle(const UIAsciiObjs& objs);
 void DrawGameOverEndingTitle(const UIAsciiObjs& objs);
+void DrawPressEnterPrompt();
 int GetMaxLineWidth(const std::vector<std::string>& art)
 {
 	int maxWidth = 0;
@@ -38,8 +42,10 @@ void EndingScene::Init(GameState& state)
 	else
 	{
 		m_gameOverEffect.Clear();
-		m_loseBurstTriggered = false;
-		StartConsoleShrink(LOSE_SHRINK_DURATION_MS); // 부드럽게 작아지기 시작
+		m_loseBurstCount = 0;
+		m_nextBurstTime = 0;
+		m_loseSequenceFinished = false;
+		StartConsoleShrink(LOSE_SHRINK_DURATION_MS);
 		SOUND->PlayBGM("Sound/k.mp3");
 	}
 }
@@ -75,21 +81,40 @@ void EndingScene::LoseUIUpdate(GameState& state)
 
 	UpdateConsoleShrink();
 
-	if (IsConsoleShrinkFinished() && !m_loseBurstTriggered)
+	if (IsConsoleShrinkFinished())
 	{
-		RestoreConsoleWindowSize();
+		if (m_loseBurstCount == 0 && m_nextBurstTime == 0)
+		{
+			RestoreConsoleWindowSize();
+			m_nextBurstTime = state.curTime;
+		}
 
-		COORD res = GetConsoleResolution();
-		int cx = res.X / 2;
-		int cy = res.Y / 3;
-		m_gameOverEffect.Trigger(cx, cy);
-		SOUND->Play("Pop");
+		if (m_loseBurstCount < LOSE_BURST_TOTAL && state.curTime >= m_nextBurstTime)
+		{
+			COORD res = GetConsoleResolution();
+			int sectionWidth = res.X / LOSE_BURST_TOTAL;
+			int cx = sectionWidth * m_loseBurstCount + sectionWidth / 2;
+			cx += -10 + rand() % 21;
+			int cy = res.Y / 3 + (rand() % 7 - 3);
 
-		m_loseBurstTriggered = true;
+			m_gameOverEffect.Trigger(cx, cy);
+			SOUND->Play("Pop");
+
+			++m_loseBurstCount;
+			m_nextBurstTime = state.curTime + LOSE_BURST_INTERVAL_MS;
+		}
+
+		if (m_loseBurstCount >= LOSE_BURST_TOTAL)
+			m_loseSequenceFinished = true;
+
+		m_gameOverEffect.Update();
 	}
 
-	if (m_loseBurstTriggered)
-		m_gameOverEffect.Update();
+	if (m_loseSequenceFinished && GetKeyDown(VK_RETURN))
+	{
+		SceneManager::GetInst()->ChangeScene("TitleScene", state);
+		return;
+	}
 }
 void EndingScene::Render(const GameState& state)
 {
@@ -135,7 +160,8 @@ void EndingScene::LoseUIRender(const GameState& state)
 	m_gameOverEffect.Draw();
 	DrawGameOverEndingTitle(objs);
 
-
+	if (m_loseSequenceFinished)
+		DrawPressEnterPrompt();
 }
 void DrawEndingTitle(const UIAsciiObjs& objs)
 {
@@ -160,4 +186,17 @@ void DrawGameOverEndingTitle(const UIAsciiObjs& objs)
 		wcout << objs.gameoverascii[i];
 	}
 	SetDefaultMode();
+}
+void DrawPressEnterPrompt()
+{
+	COORD res = GetConsoleResolution();
+	const string msg = "Press ENTER to continue";
+	int x = res.X / 2 - (int)msg.size() / 2;
+	int y = res.Y - 2; // 화면 맨 밑
+	if (x < 0) x = 0;
+
+	GotoXY(x, y);
+	SetColor(Color::LIGHT_YELLOW);
+	cout << msg;
+	SetColor();
 }

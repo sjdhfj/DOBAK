@@ -92,7 +92,7 @@ void NextDayScene::Render(const GameState& state)
 
     GotoXY(cx - 15, cy + 1);
     SetColor();
-    cout << "오늘 수익  : ";
+    cout << "지난 수익  : ";
     if (_goldDiff >= 0)
     {
         SetColor(Color::LIGHT_GREEN);
