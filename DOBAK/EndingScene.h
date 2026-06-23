@@ -21,6 +21,8 @@ private:
 	FireworkSystem m_fireworks;
 	ULONGLONG m_nextFireworkTime = 0;
 	GameOverEffect m_gameOverEffect;
-	bool m_loseBurstTriggered = false;
+	int  m_loseBurstCount = 0;          // 지금까지 터진 폭탄 수
+	ULONGLONG m_nextBurstTime = 0;      // 다음 폭탄이 터질 시각
+	bool m_loseSequenceFinished = false;
 };
 
