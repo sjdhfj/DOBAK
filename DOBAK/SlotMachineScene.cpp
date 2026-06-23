@@ -266,9 +266,20 @@ void InGameScene::Update(GameState& state)
                     }
 
                     ShakeConsoleWindow(5, 100, 1);
-                    SOUND->Play("Pop");
+
+                    Pattern& pattern = GamePatterns[match.patternIndex];
+
+                    if (pattern.eventType == PatternEventType::SixSeven)
+                    {
+                        SOUND->Play("Tung");
+                    }
+                    else
+                    {
+                        SOUND->Play("Pop");
+                    }
                 }
             }
+
 
             if (patternBlinkCount > 3)
             {
@@ -425,7 +436,7 @@ void InGameScene::DrawUI(const GameState& state)
 {
     GotoXY(0, 0);
     SetColor();
-    cout << "Coin: " << state.player.gold << "G   ";
+    cout << "니 돈: " << state.player.gold << "G   ";
 
     GotoXY(0, 1);
     SetColor(Color::LIGHT_GRAY);
@@ -580,15 +591,39 @@ void InGameScene::DrawSlotMachine()
 
 void InGameScene::DrawSlotNumbers()
 {
+    bool isSixSevenPattern = false;
+
+    if (slotState == SlotMachineState::Blinking &&
+        isPatternBlink &&
+        curPatternIndex < (int)matchedPatterns.size())
+    {
+        MatchedPattern& match = matchedPatterns[curPatternIndex];
+        Pattern& pattern = GamePatterns[match.patternIndex];
+
+        isSixSevenPattern =
+            pattern.eventType == PatternEventType::SixSeven;
+    }
+
     for (int i = 0; i < height; ++i)
     {
         for (int j = 0; j < width; ++j)
         {
             GotoXY(slotX + j * 2, slotY + i);
+
             if (IsCurrentPatternCell(i, j))
-                SetColor(Color::WHITE, Color::YELLOW);
+            {
+                if (isSixSevenPattern && slotArr[i][j] == 6)
+                    SetColor(Color::WHITE, Color::BLUE);
+                else if (isSixSevenPattern && slotArr[i][j] == 7)
+                    SetColor(Color::WHITE, Color::RED);
+                else
+                    SetColor(Color::WHITE, Color::YELLOW);
+            }
             else
+            {
                 SetColor();
+            }
+
             cout << slotArr[i][j];
             SetColor();
             cout << ' ';
