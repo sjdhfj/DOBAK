@@ -1,4 +1,5 @@
-﻿#include "EncounterScene.h"
+﻿#include <cstdlib>
+#include "EncounterScene.h"
 #include "SoundManager.h"
 #include "EncounterData.h"
 
@@ -8,7 +9,7 @@ int selectedChoice = 0;
 bool isShowingResult = false;
 string curResultText;
 ULONGLONG resultStartTime = 0;
-constexpr ULONGLONG ResultShowMs = 5;
+constexpr ULONGLONG ResultShowMs = 4000;
 
 void EncounterScene::Init(GameState& state)
 {
@@ -119,7 +120,7 @@ void EncounterScene::DrawResult()
 
     GotoXY(x + 2, y + 6);
     SetColor(Color::LIGHT_GRAY);
-    cout << "3초 뒤 상점으로 이동합니다...";
+    cout << "4초 뒤 상점으로 이동합니다...";
 
     SetColor();
 }
@@ -135,28 +136,32 @@ string EncounterScene::ApplyChoice(const EncounterChoice& choice, GameState& sta
 
     case EncounterChoiceResultType::GoldPercent:
     {
-        long long amount = state.player.gold * choice.goldPercent / 100;
-        state.player.gold += amount;
+        unsigned long long beforeGold = state.player.gold;
 
-        if (state.player.gold < 0)
-            state.player.gold = 0;
+        long long amount = (long long)(beforeGold * std::abs(choice.goldPercent) / 100);
 
-        long long displayAmount = amount;
-
-        if (displayAmount < 0)
-            displayAmount *= -1;
+        if (choice.goldPercent < 0)
+        {
+            if (beforeGold < (unsigned long long)amount)
+                state.player.gold = 0;
+            else
+                state.player.gold = beforeGold - amount;
+        }
+        else
+        {
+            state.player.gold = beforeGold + amount;
+        }
 
         string result = choice.resultText;
         string key = "{gold}";
-        string value = std::to_string(displayAmount);
+        string value = std::to_string(amount);
 
-        int pos = (int)result.find(key);
+        size_t pos = result.find(key);
         if (pos != string::npos)
             result.replace(pos, key.size(), value);
 
         return result;
     }
-
     case EncounterChoiceResultType::Item:
         state.player.inventory.push_back(choice.item);
         return choice.resultText;
