@@ -131,6 +131,7 @@
   <ItemGroup>
     <ClCompile Include="Cheater.cpp" />
     <ClCompile Include="Console.cpp" />
+    <ClCompile Include="EncounterData.cpp" />
     <ClCompile Include="EncounterScene.cpp" />
     <ClCompile Include="FireWork.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="Console.h" />
     <ClInclude Include="Defines.h" />
     <ClInclude Include="AsciiArt.h" />
+    <ClInclude Include="EncounterData.h" />
     <ClInclude Include="EncounterScene.h" />
     <ClInclude Include="Enums.h" />
     <ClInclude Include="FireWork.h" />

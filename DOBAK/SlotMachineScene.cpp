@@ -544,35 +544,82 @@ void InGameScene::DrawPatternValuePanel(const GameState& state)
     GotoXY(panelX, panelY + 2);
     cout << "+" << string(panelWidth - 2, '=') << "+";
 
+    int drawRow = 0;
+    int horizontalSixSevenIndex = -1;
+
     for (int i = 0; i < GamePatternCount; ++i)
     {
         const Pattern& pattern = GamePatterns[i];
 
+        if (pattern.eventType == PatternEventType::SixSeven)
+        {
+            if (pattern.width == 2 && pattern.height == 1)
+                horizontalSixSevenIndex = i;
+
+            continue;
+        }
+
         string valueText;
-        if (pattern.eventType == PatternEventType::SixSeven) valueText = "x2 EVENT";
-        else if (pattern.eventType == PatternEventType::SixOne)   valueText = "RESET";
-        else                                                        valueText = std::to_string(pattern.reward) + "G";
+
+        if (pattern.eventType == PatternEventType::SixOne)
+            valueText = "RESET";
+        else
+            valueText = std::to_string(pattern.reward) + "G";
 
         int maxContent = panelWidth - 4;
         string name = pattern.patternName;
         string sep = ":";
         int valW = (int)valueText.size();
         int nameW = maxContent - valW - 1;
-        if (nameW < 1) nameW = 1;
+
+        if (nameW < 1)
+            nameW = 1;
+
         if ((int)name.size() > nameW)
             name = name.substr(0, nameW);
 
         int gap = maxContent - (int)name.size() - 1 - valW;
         string line = name + string(std::max(0, gap), ' ') + sep + valueText;
 
-        GotoXY(panelX, panelY + 3 + i);
+        GotoXY(panelX, panelY + 3 + drawRow);
         SetColor(pattern.eventType == PatternEventType::Gold ? Color::WHITE : Color::LIGHT_YELLOW);
         cout << "| " << std::left << std::setw(maxContent) << line << " |";
+
+        drawRow++;
+    }
+
+    if (horizontalSixSevenIndex != -1)
+    {
+        const Pattern& pattern = GamePatterns[horizontalSixSevenIndex];
+
+        string valueText = "x2 EVENT";
+
+        int maxContent = panelWidth - 4;
+        string name = pattern.patternName;
+        string sep = ":";
+        int valW = (int)valueText.size();
+        int nameW = maxContent - valW - 1;
+
+        if (nameW < 1)
+            nameW = 1;
+
+        if ((int)name.size() > nameW)
+            name = name.substr(0, nameW);
+
+        int gap = maxContent - (int)name.size() - 1 - valW;
+        string line = name + string(std::max(0, gap), ' ') + sep + valueText;
+
+        GotoXY(panelX, panelY + 3 + drawRow);
+        SetColor(Color::LIGHT_YELLOW);
+        cout << "| " << std::left << std::setw(maxContent) << line << " |";
+
+        drawRow++;
     }
 
     SetColor(Color::LIGHT_YELLOW);
-    GotoXY(panelX, panelY + 3 + GamePatternCount);
+    GotoXY(panelX, panelY + 3 + drawRow);
     cout << "+" << string(panelWidth - 2, '=') << "+";
+
     SetColor();
 }
 
