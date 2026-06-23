@@ -1,7 +1,9 @@
-﻿#include "SlotMachineScene.h"
+﻿#include <iomanip>
+#include <string>
+#include <vector>
+#include "SlotMachineScene.h"
 #include "Console.h"
 #include "AsciiArt.h"
-#include <vector>
 #include "Pattern.h"
 #include "SceneManager.h"
 #include "SoundManager.h"
@@ -93,7 +95,7 @@ void InGameScene::Init(GameState& state)
         for (int j = 0; j < width; ++j)
             slotArr[i][j] = 0;
 
-    DrawProbabilityUI(state);
+    DrawPatternValuePanel(state);
 }
 
 void InGameScene::Update(GameState& state)
@@ -275,7 +277,7 @@ void InGameScene::Render(const GameState& state)
     DrawSlotNumbers();
     DrawSixSeven();
     DrawPlusGold();
-    DrawProbabilityUI(state);
+    DrawPatternValuePanel(state);
 }
 
 void InGameScene::DrawPlusGold()
@@ -404,45 +406,62 @@ void InGameScene::DrawInventory(const GameState& state)
     SetColor();
 }
 
-void InGameScene::DrawProbabilityUI(const GameState& state)
+void InGameScene::DrawPatternValuePanel(const GameState& state)
 {
     COORD res = GetConsoleResolution();
 
-    constexpr int panelWidth = 11;
-    constexpr int symbolCount = 7;
-
+    constexpr int panelWidth = 18;
     int panelX = res.X - panelWidth;
     int panelY = 0;
 
     SetColor(Color::LIGHT_YELLOW);
-
     GotoXY(panelX, panelY);
-    cout << "+=========+";
+    cout << "+================+";
 
     GotoXY(panelX, panelY + 1);
-    cout << "| CHANCE  |";
+    cout << "| PATTERN VALUE  |";
 
-    SetColor(Color::WHITE);
+    GotoXY(panelX, panelY + 2);
+    cout << "+================+";
 
-    double probability = 100.0 / symbolCount;
-
-    for (int number = 1; number <= symbolCount; ++number)
+    for (int i = 0; i < GamePatternCount; ++i)
     {
-        GotoXY(panelX, panelY + 1 + number);
+        const Pattern& pattern = GamePatterns[i];
 
-        cout << "|"
-            << number << ": "
-            << std::fixed << std::setprecision(2)
-            << probability << "%|";
+        string valueText;
+
+        if (pattern.eventType == PatternEventType::Gold)
+        {
+            valueText = std::to_string(pattern.reward) + "G";
+        }
+        else if (pattern.eventType == PatternEventType::SixSeven)
+        {
+            valueText = "x2 EVENT";
+        }
+        else if (pattern.eventType == PatternEventType::SixOne)
+        {
+            valueText = "EVENT";
+        }
+        else
+        {
+            valueText = "EVENT";
+        }
+
+        string line = pattern.patternName + " : " + valueText;
+
+        if ((int)line.size() > panelWidth - 3)
+            line = line.substr(0, panelWidth - 3);
+
+        GotoXY(panelX, panelY + 3 + i);
+        SetColor(Color::WHITE);
+        cout << "| " << std::left << std::setw(panelWidth - 3) << line << "|";
     }
 
     SetColor(Color::LIGHT_YELLOW);
-
-    GotoXY(panelX, panelY + symbolCount + 2);
-    cout << "+=========+";
+    GotoXY(panelX, panelY + 3 + GamePatternCount);
+    cout << "+================+";
 
     SetColor();
-    cout << std::defaultfloat;
 }
 void InGameScene::DrawSlotMachine()
 {
@@ -615,7 +634,7 @@ void InGameScene::ExecutePatternEvent(const Pattern& pattern, GameState& state)
     case PatternEventType::SixOne:
     {
         baseReward = 0;
-        break;
+
     }
     }
 }
