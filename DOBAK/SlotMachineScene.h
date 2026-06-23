@@ -26,7 +26,7 @@ class InGameScene : public AbstractScene
 	bool IsSameInArea(int startY, int startX, int patternWidth, int patternHeight);
 	void FindMatchedPatterns();
 	void ExecutePatternEvent(const Pattern& pattern, GameState& state);
-	ItemEffectContext CollectItemEffects(GameState& state);
+	ItemEffectContext CollectItemEffects(const GameState& state);
 	void DrawEffectNotice();
 	void DrawDayInfo(const GameState& state);
 	string _lastEffectStr = "";

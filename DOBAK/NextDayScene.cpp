@@ -59,7 +59,7 @@ void NextDayScene::Update(GameState& state)
     if (GetKeyDown(VK_RETURN) || GetKeyDown(VK_SPACE))
     {
         PlayCloseTransition(state, .9f);
-        if (rand() % 100 + 1 <= 100)
+        if (rand() % 100 + 1 <= 40)
         {
             SceneManager::GetInst()->ChangeScene("EncounterScene", state);
         }
