@@ -16,7 +16,7 @@ Pattern GamePatterns[] =
 	{ "2x3∆–≈œ", 2, 3, PatternType::Same, {},PatternEventType::Gold, 200},
 	{ "3x3∆–≈œ", 3, 3, PatternType::Same, {},PatternEventType::Gold, 500},
 	{ "4x3∆–≈œ", 4, 3, PatternType::Same, {},PatternEventType::Gold, 2000},
-	{ "5x3∆–≈œ", 5, 3, PatternType::Same, {},PatternEventType::Gold, 6767},
+	{ "¿Ë∆Ã!!!", 5, 3, PatternType::Same, {},PatternEventType::Gold, 6767},
 };
 
 

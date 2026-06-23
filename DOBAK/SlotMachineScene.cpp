@@ -539,7 +539,7 @@ void InGameScene::DrawPatternValuePanel(const GameState& state)
     cout << "+" << string(panelWidth - 2, '=') << "+";
 
     GotoXY(panelX, panelY + 1);
-    cout << "|  PATTERN VALUE   |";
+    cout << "|      패턴 가치     |";
 
     GotoXY(panelX, panelY + 2);
     cout << "+" << string(panelWidth - 2, '=') << "+";
@@ -578,8 +578,9 @@ void InGameScene::DrawPatternValuePanel(const GameState& state)
         if ((int)name.size() > nameW)
             name = name.substr(0, nameW);
 
-        int gap = maxContent - (int)name.size() - 1 - valW;
-        string line = name + string(std::max(0, gap), ' ') + sep + valueText;
+        string label = name + ":";
+        int gap = maxContent - (int)label.size() - valW;
+        string line = label + string(std::max(0, gap), ' ') + valueText;
 
         GotoXY(panelX, panelY + 3 + drawRow);
         SetColor(pattern.eventType == PatternEventType::Gold ? Color::WHITE : Color::LIGHT_YELLOW);

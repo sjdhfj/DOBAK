@@ -1,4 +1,10 @@
 #include "EncounterData.h"
+#include "GameState.h"
+
+long long GetGoldPercent(const GameState& state, int percent)
+{
+    return state.player.gold * percent / 100;
+}
 
 vector<EncounterData> encounters =
 {
@@ -46,9 +52,9 @@ vector<EncounterData> encounters =
             R"(-------~~:;;;;;;;;;;;!;;;!***!!!!!;!!!;;;;;;;;;;:-)"
         },
         {
-            { "\"어.. 안녕..?\" 라고 말한다", EncounterChoiceResultType::Nothing, 0, Item{}, "붉은 새는 아무 말 없이 고개만 기울이고 있었다." },
-            { "\"겁나 못생겼네\" 라고 말한다", EncounterChoiceResultType::Gold, -100, Item{}, "화가 난 붉은 새가 100G를 물고 날아가 버렸다!" },
-            { "\"우리 집에서 고양이 보고 갈래?\" 라고 말한다", EncounterChoiceResultType::Gold, 100, Item{}, "붉은 새는 이상하게 만족한 듯 당신에게 100G를 건넸다." }
+            { "\"어.. 안녕..?\" 라고 말한다", EncounterChoiceResultType::Nothing, 0,0, Item{}, "붉은 새는 아무 말 없이 고개만 기울이고 있었다." },
+            { "\"겁나 못생겼네\" 라고 말한다", EncounterChoiceResultType::GoldPercent, 0, -10, Item{}, "화가 난 붉은 새가 {gold}G를 물고 날아가 버렸다!" },
+            { "\"우리 집에서 고양이 보고 갈래?\" 라고 말한다", EncounterChoiceResultType::GoldPercent, 0, 10, Item{}, "붉은 새는 이상하게 만족한 듯 당신에게 {gold}G를 건넸다." }
         }
     },
 
@@ -99,9 +105,9 @@ vector<EncounterData> encounters =
             R"(;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;/#######\;;;;;;;)"
         },
         {
-            { "\"네? 싫은데요?\" 라고 말한다.", EncounterChoiceResultType::Nothing, 0, Item{}, "춘팔은 엉엉 울며 도망갔다... - 춘팔: 너무행!! ㅠㅠㅠ" },
-            { "\"ㅇ...야..야메뗏!!\" 이라고 말한다.", EncounterChoiceResultType::Gold, -100, Item{}, "화가 난 붉은 새가 100G를 물고 날아가 버렸다!" },
-            { "\"넹\" 이라고 말한다.", EncounterChoiceResultType::Nothing }
+            { "\"네? 싫은데요?\" 라고 말한다.", EncounterChoiceResultType::Nothing, 0,0, Item{}, "춘팔은 엉엉 울며 도망갔다... - 춘팔: 너무행!! ㅠㅠㅠ" },
+            { "\"ㅇ...야..야메뗏!!\" 이라고 말한다.", EncounterChoiceResultType::GoldPercent,0, -20, Item{}, "춘팔은 당신이 만만해보였는지 {gold}G를 뺏어갔다... - 춘팔: 히히히하" },
+            { "\"넹\" 이라고 말한다.", EncounterChoiceResultType::Gold, 1,0, Item{}, "춘팔은 당황하며 미안해한다. - 춘팔: ㅁ..미안 - 춘팔이 도망을 갈 때 1원을 떨어트리고 갔다." },
         }
     }
 };
