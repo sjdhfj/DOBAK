@@ -14,6 +14,7 @@ class InGameScene : public AbstractScene
 	void Update(GameState& state);
 	void Render(const GameState& state);
 	void DrawUI(const GameState& state);
+	bool IsPatternMatched(int startY,int startX,const Pattern& pattern);
 	void DrawPlusGold();
 	void DrawProbabilityUI(const GameState& state);
 	void DrawInventoryUI(GameState& state);
@@ -26,5 +27,6 @@ class InGameScene : public AbstractScene
 	int CheckPatternReward(const Pattern& pattern);
 	bool IsSameInArea(int startY, int startX, int patternWidth, int patternHeight);
 	void FindMatchedPatterns();
+	void ExecutePatternEvent(const Pattern& pattern,GameState& state);
 	ItemEffectContext CollectItemEffects(GameState& state);
 };
