@@ -9,10 +9,13 @@ constexpr int SIXSEVENPOS = 30;
 constexpr int SpinsPerDay = 5;
 constexpr int BaseSpinMs = 1500;
 constexpr int MinSpinMs = 300;
+constexpr int ResultBlinkIntervalMs = 150;
+constexpr int ResultBlinkTimes = 3;
 
 SlotMachineState slotState;
 ULONGLONG lastSlotUpdateTime;
 ULONGLONG lastSlotStartTime;
+ULONGLONG rollingSoundLastTime;
 int width = 5, height = 3;
 int** slotArr = new int* [height];
 int slotX = 0, slotY = 0;
@@ -36,14 +39,25 @@ ItemEffectContext curItemEffects{};
 
 constexpr int InvX = 1;
 constexpr int InvY = 3;
-constexpr int CellW = 7;       
-constexpr int ArtH = 3;    
-constexpr int CellH = ArtH + 2; 
-constexpr int InvCols = 3;      
-constexpr int InvRows = 4;    
+constexpr int CellW = 7;
+constexpr int ArtH = 3;
+constexpr int CellH = ArtH + 2;
+constexpr int InvCols = 3;
+constexpr int InvRows = 4;
 constexpr int InvMax = InvCols * InvRows;
 
 int baseReward = 0;
+
+bool isResultBlinking = false;
+bool isResultBlinkYellow = false;
+int resultBlinkCount = 0;
+ULONGLONG lastResultBlinkTime = 0;
+bool pendingSixSevenEvent = false;
+
+//패턴 블링크
+constexpr int MaxPatternBlinkIntervalMs = 60;
+constexpr int MinPatternBlinkIntervalMs = 20;
+constexpr int PatternBlinkSpeedStepMs = 5;
 
 static void OnSpinComplete(GameState& state)
 {
@@ -92,23 +106,32 @@ void InGameScene::Update(GameState& state)
     if (GetKeyDown(VK_SPACE) && slotState == SlotMachineState::Idle)
     {
         baseReward = 0;
+        pendingSixSevenEvent = false;
+        isResultBlinking = false;
+        isResultBlinkYellow = false;
+        resultBlinkCount = 0;
         curItemEffects = CollectItemEffects(state);
 
         slotState = SlotMachineState::Rolling;
         lastSlotStartTime = state.curTime;
         lastSlotUpdateTime = state.curTime;
+        rollingSoundLastTime = state.curTime;
     }
 
     if (slotState == SlotMachineState::Rolling)
     {
-
         if (state.curTime - lastSlotUpdateTime >= 20)
         {
-            SOUND->Play("Rolling");
+            if (state.curTime - rollingSoundLastTime >= 50)
+            {
+                rollingSoundLastTime = state.curTime;
+                SOUND->Play("Rolling");
+            }
+
             lastSlotUpdateTime = state.curTime;
             for (int i = 0; i < height; ++i)
                 for (int j = 0; j < width; ++j)
-                    slotArr[i][j] = rand() % 1 + 1;
+                    slotArr[i][j] = rand() % 7 + 1;
         }
 
         int spinMs = std::max(MinSpinMs, BaseSpinMs - curItemEffects.spinSpeedBonus);
@@ -136,48 +159,87 @@ void InGameScene::Update(GameState& state)
         }
     }
 
-    if (slotState == SlotMachineState::Blinking)
+    if (slotState == SlotMachineState::Blinking && !isResultBlinking)
     {
-        if (state.curTime - lastPatternBlinkTime >= 50)
-        {
-            if (patternBlinkCount == 1 && isPatternBlink)
-            {   
-                ShakeConsoleWindow(5, 100, 1);
-                SOUND->Play("Pop");
-            }
+        int patternBlinkIntervalMs =
+            MaxPatternBlinkIntervalMs - ((int)matchedPatterns.size() - 1) * PatternBlinkSpeedStepMs;
 
+        patternBlinkIntervalMs = std::max(MinPatternBlinkIntervalMs, patternBlinkIntervalMs);
+
+        if (state.curTime - lastPatternBlinkTime >= (ULONGLONG)patternBlinkIntervalMs)
+        {
             lastPatternBlinkTime = state.curTime;
+
             isPatternBlink = !isPatternBlink;
+
             if (isPatternBlink)
+            {
                 patternBlinkCount++;
+
+                if (patternBlinkCount == 1)
+                {
+                    MatchedPattern& match = matchedPatterns[curPatternIndex];
+
+                    if (!match.rewardApplied)
+                    {
+                        Pattern& pattern = GamePatterns[match.patternIndex];
+                        ExecutePatternEvent(pattern, state);
+                        match.rewardApplied = true;
+                    }
+
+                    ShakeConsoleWindow(5, 100, 1);
+                    SOUND->Play("Pop");
+                }
+            }
 
             if (patternBlinkCount > 3)
             {
-                MatchedPattern& match =
-                    matchedPatterns[curPatternIndex];
-
-                Pattern& pattern =
-                    GamePatterns[match.patternIndex];
-
-                ExecutePatternEvent(pattern, state);
-
-                // 특수 이벤트 상태로 넘어갔다면 여기서 중단
-                if (slotState == SlotMachineState::SixSeven)
-                {
-                    isPatternBlink = false;
-                    return;
-                }
-
                 curPatternIndex++;
                 patternBlinkCount = 0;
                 isPatternBlink = false;
 
                 if (curPatternIndex >= (int)matchedPatterns.size())
                 {
-                    state.player.gold += baseReward;
-                    OnSpinComplete(state);
-                    slotState = SlotMachineState::Idle;
+                    isResultBlinking = true;
+                    isResultBlinkYellow = false;
+                    resultBlinkCount = 0;
+                    lastResultBlinkTime = state.curTime;
                 }
+            }
+        }
+    }
+
+    if (isResultBlinking &&
+        state.curTime - lastResultBlinkTime >= ResultBlinkIntervalMs)
+    {
+        lastResultBlinkTime = state.curTime;
+        isResultBlinkYellow = !isResultBlinkYellow;
+
+        if (isResultBlinkYellow)
+        {
+            resultBlinkCount++;
+            SOUND->Play("SlotEmission");
+        }
+
+        if (resultBlinkCount >= ResultBlinkTimes && !isResultBlinkYellow)
+        {
+            isResultBlinking = false;
+            state.player.gold += baseReward;
+            SOUND->Play("SlotMoney");
+
+            if (pendingSixSevenEvent)
+            {
+                sixSevenCount = 0;
+                isSixSeven = true;
+                lastSixSevenMoveTime = state.curTime;
+                ShakeConsoleWindow(20, 1250, 1);
+                SOUND->Play("67");
+                slotState = SlotMachineState::SixSeven;
+            }
+            else
+            {
+                OnSpinComplete(state);
+                slotState = SlotMachineState::Idle;
             }
         }
     }
@@ -210,7 +272,7 @@ void InGameScene::Render(const GameState& state)
     DrawUI(state);
     DrawInventory(state);
     DrawSlotMachine();
-    DrawSlotNumbers(); 
+    DrawSlotNumbers();
     DrawSixSeven();
     DrawPlusGold();
     DrawProbabilityUI(state);
@@ -221,26 +283,29 @@ void InGameScene::DrawPlusGold()
     int startX = slotX - 4;
     int startY = slotY - 5;
 
-    // 이전 출력 잔상 제거
     SetColor();
     for (int i = 0; i < 3; ++i)
     {
         GotoXY(startX, startY + i);
-        cout << "                         ";
+        cout << "                                                                                                                              ";
     }
 
     if (slotState != SlotMachineState::Blinking)
         return;
 
-    if (curPatternIndex >= matchedPatterns.size())
+    if (baseReward <= 0)
         return;
 
-    int reward = baseReward;
-
-    SetColor(Color::LIGHT_YELLOW);
-
     GotoXY(startX, startY);
-    wcout << "총 획득량: +" << reward << "G";
+    SetColor(Color::WHITE);
+    cout << "획득량: +";
+
+    if (isResultBlinking && isResultBlinkYellow)
+        SetColor(Color::YELLOW);
+    else
+        SetColor(Color::WHITE);
+
+    cout << baseReward << "G   ";
     SetColor();
 }
 
@@ -381,7 +446,10 @@ void InGameScene::DrawProbabilityUI(const GameState& state)
 }
 void InGameScene::DrawSlotMachine()
 {
-    SetColor();
+    if (isResultBlinking && isResultBlinkYellow)
+        SetColor(Color::YELLOW);
+    else
+        SetColor();
     for (int i = 0; i < (int)asciiArts.slotMachine.size(); ++i)
     {
         GotoXY(titleX, titleY + i);
@@ -490,7 +558,8 @@ void InGameScene::FindMatchedPatterns()
                             pattern.width,
                             pattern.height,
                             pattern.reward,
-                            p
+                            p,
+                            false
                         });
                 }
     }
@@ -518,7 +587,7 @@ ItemEffectContext InGameScene::CollectItemEffects(GameState& state)
     return ctx;
 }
 
-void InGameScene::ExecutePatternEvent(const Pattern& pattern,GameState& state)
+void InGameScene::ExecutePatternEvent(const Pattern& pattern, GameState& state)
 {
     switch (pattern.eventType)
     {
@@ -539,23 +608,19 @@ void InGameScene::ExecutePatternEvent(const Pattern& pattern,GameState& state)
 
     case PatternEventType::SixSeven:
     {
-        sixSevenCount = 0;
-        isSixSeven = true;
-        lastSixSevenMoveTime = state.curTime;
-
-        ShakeConsoleWindow(20, 1250, 1);
-        SOUND->Play("67");
-
-        slotState = SlotMachineState::SixSeven;
+        baseReward *= 2;
+        pendingSixSevenEvent = true;
+        break;
+    }
+    case PatternEventType::SixOne:
+    {
+        baseReward = 0;
         break;
     }
     }
 }
 
-bool InGameScene::IsPatternMatched(
-    int startY,
-    int startX,
-    const Pattern& pattern)
+bool InGameScene::IsPatternMatched(int startY,int startX,const Pattern& pattern)
 {
     if (pattern.type == PatternType::Same)
     {
@@ -586,3 +651,4 @@ bool InGameScene::IsPatternMatched(
 
     return false;
 }
+

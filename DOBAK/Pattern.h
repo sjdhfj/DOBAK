@@ -12,7 +12,8 @@ enum class PatternType
 enum class PatternEventType
 {
 	Gold,
-	SixSeven
+	SixSeven,
+	SixOne
 };
 
 struct Pattern
@@ -36,8 +37,8 @@ struct MatchedPattern
 	int width;
 	int height;
 	int reward;
-
 	int patternIndex;
+	bool rewardApplied;
 };
 
 extern Pattern GamePatterns[];

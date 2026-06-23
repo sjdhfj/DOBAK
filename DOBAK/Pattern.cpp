@@ -17,7 +17,7 @@ Pattern GamePatterns[] =
 	{ "3x3", 3, 3, PatternType::Same, {},PatternEventType::Gold, 500},
 	{ "4x3", 4, 3, PatternType::Same, {},PatternEventType::Gold, 2000},
 	{ "5x3", 5, 3, PatternType::Same, {},PatternEventType::Gold, 6767},
-
+	{ "61", 2, 1, PatternType::Fixed, { 6, 1 },PatternEventType::SixOne, 0 },
 };
 
 
