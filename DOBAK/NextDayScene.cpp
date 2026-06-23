@@ -1,5 +1,8 @@
 #include "NextDayScene.h"
 #include "SceneManager.h"
+constexpr int DaysPerWeek = 3;
+constexpr int TotalWeeks = 67;
+constexpr int MaxQuotaFails = 3;
 
 void NextDayScene::Init(GameState& state)
 {
@@ -7,12 +10,53 @@ void NextDayScene::Init(GameState& state)
     state.day++;
     state.dailySpinCount = 0;
     state.quotaSubmitted = false;
-
-    // 3일마다 할당량 자동 증가
-    if (state.day % state.quotaIncreaseDay == 0)
-        state.dailyQuota += 300;
-
+    state.quotaFromDayEnd = false;
     state.goldAtDayStart = state.player.gold;
+
+    if (state.day % DaysPerWeek == 0)
+    {
+        state.week++;
+
+        bool met = state.quotaMet;
+
+        if (!met)
+        {
+            // gold/dailyQuota가 둘 다 long long이므로 그냥 빼기만 하면 정상적으로 음수/양수 판단 가능.
+            // 그래도 혹시 모를 음수 결과는 0으로 클램프(이월액이 음수가 되는 걸 방지).
+            long long shortfall = std::max<long long>(0, state.dailyQuota - state.player.gold);
+            state.carryOverQuota += shortfall;
+            state.quotaFailCount++;
+
+            if (state.quotaFailCount >= MaxQuotaFails)
+            {
+                state.isWinEnding = false;
+                state.requestEndGame = true;
+            }
+        }
+        else
+        {
+            state.carryOverQuota = 0; // 달성하면 이월 해소
+        }
+
+        if (!state.requestEndGame)
+        {
+            if (state.week > TotalWeeks)
+            {
+                state.isWinEnding = true;
+                state.requestEndGame = true;
+            }
+            else
+            {
+                // 이전엔 state.dailyQuota * pow(1.5, week-1) 로 계산해서
+                // 이미 누적된 dailyQuota에 거듭제곱을 또 곱하는 이중 누적 버그가 있었음.
+                // 이제는 항상 "기준 골드(base=10) x 주차"로부터 새로 계산해서 누적 폭주를 방지.
+                state.baseQuota = CalcQuotaForWeek(state.week, 10);
+                state.dailyQuota = state.baseQuota + state.carryOverQuota;
+                state.quotaMet = false;
+            }
+        }
+    }
+
     PlayOpenTransition(state, 1);
 }
 

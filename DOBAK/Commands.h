@@ -11,13 +11,6 @@ public:
     }
 private:
     int amount;
-//ItemEffectContext context{ state.player.item };
-//
-//for (Item& item : state.player.inventory)
-//{
-//    if (item.type == ItemType::EQUIP && item.effect)
-//        item.effect->Execute(context);
-//}
 };
 class ProbabilityCommand : public ICommand
 {
@@ -78,4 +71,19 @@ public:
     void Execute(ItemEffectContext& _context) override { _context.comboBonusPerPattern += amount; }
 private:
     int amount;
+};
+class PatternBonusCommand : public ICommand
+{
+public:
+    PatternBonusCommand(int w, int h, float mult = 1.0f, int flat = 0)
+        : _w(w), _h(h), _mult(mult), _flat(flat) {
+    }
+    void Execute(ItemEffectContext& _context) override
+    {
+        _context.patternBonuses.push_back({ _w, _h, _mult, _flat });
+    }
+private:
+    int   _w, _h;
+    float _mult;
+    int   _flat;
 };

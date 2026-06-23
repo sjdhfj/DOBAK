@@ -7,13 +7,14 @@ constexpr int HEIGHT = 45;
 #include <ostream>
 #include <string>
 #include <vector>
-
+#include <cmath>
+#include <algorithm>
 #include <Windows.h>
 #include "Item.h"
 struct PlayerData
 {
 	std::vector<Item> inventory;
-	ULONGLONG gold = 0;
+	long long gold = 0; // ULONGLONG -> long long : 음수 비교/연산이 정상 동작하도록 변경
 };
 struct GameState
 {
@@ -24,11 +25,35 @@ struct GameState
 	PlayerData player;
 	bool requestNextDay = false;
 	int day = 1;
-	int goldAtDayStart = 0;
+	long long goldAtDayStart = 0;
 	int dailySpinCount = 0;
-	ULONGLONG dailyQuota = 1000;
+	long long dailyQuota = 10;
 	bool quotaMet = false;
 	bool quotaSubmitted = false;
 	int  quotaIncreaseDay = 3;
 	bool quotaFromDayEnd = false;
+	bool requestQuotaCheck = false;
+	bool isWinEnding = false;
+	int week = 1;
+	int quotaFailCount = 0;
+	bool requestEndGame = false;
+	long long carryOverQuota = 0;
+	long long baseQuota = dailyQuota;
 };
+inline long long CalcQuotaForWeek(int week, long long base)
+{
+	constexpr double p = 1.2;
+	constexpr double k = 4.92;
+
+	double growth = std::pow(1.0 + week, p)
+		* std::exp(week / k)
+		* (1.0 + std::log(1.0 + week));
+
+	double result = (double)base * growth;
+
+	constexpr double LL_MAX = 9223372036854775807.0;
+	if (result > LL_MAX) result = LL_MAX;
+	if (result < 0) result = 0;
+
+	return (long long)result;
+}

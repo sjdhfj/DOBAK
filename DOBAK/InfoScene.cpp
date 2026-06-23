@@ -77,7 +77,7 @@ void InfoScene::Update(GameState& state)
     }
 
     if (GetKeyDown(VK_ESCAPE))
-        SceneManager::GetInst()->ChangeScene("TitleScene", state);
+        SceneManager::GetInst()->ChangeSceneToPrev(state);
 }
 
 void InfoScene::Render(const GameState& state)

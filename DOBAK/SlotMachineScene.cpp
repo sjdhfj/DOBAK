@@ -142,14 +142,31 @@ void InGameScene::Update(GameState& state)
             if (patternBlinkCount == 1)
             {
                 ShakeConsoleWindow(5, 100, 1);
+
+                int pw = matchedPatterns[curPatternIndex].width;
+                int ph = matchedPatterns[curPatternIndex].height;
+
+                int thisReward = matchedPatterns[curPatternIndex].reward;
+
+                thisReward += curItemEffects.coin;
+                thisReward += curItemEffects.comboBonusPerPattern * curPatternIndex;
+
+                float patternMult = 1.0f;
+                for (const auto& pb : curItemEffects.patternBonuses)
+                {
+                    if (pb.targetWidth == pw && pb.targetHeight == ph)
+                    {
+                        patternMult *= pb.multiplier;
+                        thisReward += pb.flatBonus;
+                    }
+                }
+                thisReward = (int)(thisReward * patternMult);
+
+                thisReward = (int)(thisReward * curItemEffects.multiplier);
+
+                baseReward += thisReward;
+
                 DrawPlusGold();
-                baseReward += matchedPatterns[curPatternIndex].reward;
-
-                baseReward += curItemEffects.coin;
-
-                baseReward += curItemEffects.comboBonusPerPattern * curPatternIndex;
-
-                baseReward = (int)(baseReward * curItemEffects.multiplier);
                 SOUND->Play("Pop");
             }
 
@@ -160,7 +177,6 @@ void InGameScene::Update(GameState& state)
 
             if (patternBlinkCount > 3)
             {
-
                 curPatternIndex++;
                 patternBlinkCount = 0;
                 isPatternBlink = false;
@@ -252,9 +268,54 @@ void InGameScene::DrawUI(const GameState& state)
     cout << "스핀: " << state.dailySpinCount << " / " << SpinsPerDay << "  ";
 }
 
+// ── 아이템 효과 요약 문자열 생성 ────────────────────────────────
+static string GetEffectSummary(const Item& item)
+{
+    if (!item.effect) return "";
+
+    ItemEffectContext ctx{};
+    ctx.multiplier = 1.0f;
+    item.effect->Execute(ctx);
+
+    // 우선순위: 배율 > 패턴특화 > 골드 > 위로금 > 속도 > 콤보
+    char buf[32]{};
+    if (ctx.multiplier != 1.0f)
+    {
+        snprintf(buf, sizeof(buf), "x%.1f", ctx.multiplier);
+        return buf;
+    }
+    if (!ctx.patternBonuses.empty())
+    {
+        auto& pb = ctx.patternBonuses[0];
+        snprintf(buf, sizeof(buf), "%dx%d^%.0f",
+            pb.targetWidth, pb.targetHeight, pb.multiplier);
+        return buf;
+    }
+    if (ctx.coin != 0)
+    {
+        snprintf(buf, sizeof(buf), "%+dG", ctx.coin);
+        return buf;
+    }
+    if (ctx.consolationGold != 0)
+    {
+        snprintf(buf, sizeof(buf), "위%dG", ctx.consolationGold);
+        return buf;
+    }
+    if (ctx.spinSpeedBonus != 0)
+    {
+        snprintf(buf, sizeof(buf), "속%d", ctx.spinSpeedBonus);
+        return buf;
+    }
+    if (ctx.comboBonusPerPattern != 0)
+    {
+        snprintf(buf, sizeof(buf), "콤%d", ctx.comboBonusPerPattern);
+        return buf;
+    }
+    return "";
+}
+
 void InGameScene::DrawInventory(const GameState& state)
 {
-
     GotoXY(InvX, InvY);
     SetColor(Color::LIGHT_YELLOW);
     cout << "[ 보유 아이템 ]";
@@ -265,6 +326,21 @@ void InGameScene::DrawInventory(const GameState& state)
 
     const auto& inv = state.player.inventory;
     int count = std::min((int)inv.size(), InvMax);
+
+    auto Clip = [](const string& src, int maxDispW) -> string
+        {
+            string out; int w = 0;
+            for (int c = 0; c < (int)src.size(); )
+            {
+                unsigned char ch = (unsigned char)src[c];
+                int cw = (ch >= 0x81 && ch <= 0xFE) ? 2 : 1;
+                if (w + cw > maxDispW) break;
+                out += src.substr(c, cw); w += cw; c += cw;
+            }
+            int pad = maxDispW - w;
+            if (pad > 0) out += string(pad, ' ');
+            return out;
+        };
 
     for (int i = 0; i < InvMax; ++i)
     {
@@ -281,39 +357,18 @@ void InGameScene::DrawInventory(const GameState& state)
             {
                 GotoXY(x, y + a);
                 SetColor(Color::CYAN);
-                if (a < (int)item.art.size())
-                {
-                    string line = item.art[a];
-                    if ((int)line.size() >= CellW)
-                        line = line.substr(0, CellW);
-                    cout << std::left << std::setw(CellW) << line;
-                }
-                else
-                {
-                    cout << string(CellW, ' ');
-                }
+                string line = (a < (int)item.art.size()) ? item.art[a] : "";
+                if ((int)line.size() >= CellW) line = line.substr(0, CellW);
+                cout << std::left << std::setw(CellW) << line;
             }
 
             GotoXY(x, y + ArtH);
             SetColor(Color::WHITE);
-            const string& name = item.name;
-            string clipped;
-            int dispW = 0;
-            for (int c = 0; c < (int)name.size(); )
-            {
-                unsigned char ch = (unsigned char)name[c];
-                int cw = (ch >= 0x81 && ch <= 0xFE) ? 2 : 1;
-                if (dispW + cw > CellW) break;
-                clipped += name.substr(c, cw);
-                dispW += cw;
-                c += cw;
-            }
-            cout << clipped;
-            int remain = CellW - dispW;
-            if (remain > 0) cout << string(remain, ' ');
+            cout << Clip(item.name, CellW);
 
             GotoXY(x, y + ArtH + 1);
-            cout << string(CellW, ' ');
+            SetColor(Color::LIGHT_YELLOW);
+            cout << Clip(GetEffectSummary(item), CellW);
         }
         else
         {

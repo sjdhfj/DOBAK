@@ -2,6 +2,7 @@
 #include<map>
 #include<memory>
 #include<string>
+#include<vector>
 #include "Defines.h"
 #include "Scene.h"
 class SceneManager
@@ -31,10 +32,12 @@ public:
 public:
 	void Update(GameState& state);
 	void Render(const GameState& state);
-	void ChangeScene(const std::string& _sceneName, GameState& state);
+	void ChangeScene(const std::string& _sceneName, GameState& state, bool _pushHistory = true);
+	void ChangeSceneToPrev(GameState& state);
 	void RegisterScene(const std::string& _sceneName, std::unique_ptr<AbstractScene> _scene);
 private:
 	static SceneManager* m_inst;
 	std::map<std::string, std::unique_ptr<AbstractScene>> m_mapScenes;
 	AbstractScene* m_curScene = nullptr;
+	std::vector<AbstractScene*> m_sceneHistory;
 };

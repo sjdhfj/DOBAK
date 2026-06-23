@@ -157,6 +157,10 @@ void ShopScene::Update(GameState& state)
 
     if (GetKeyDown(VK_ESCAPE))
     {
+        SceneManager::GetInst()->ChangeScene("InfoScene", state);
+    }
+    if (GetKeyDown('B'))
+    {
         PlayCloseTransition(state, 1);
         SceneManager::GetInst()->ChangeScene("InGameScene", state);
     }
@@ -180,7 +184,7 @@ void ShopScene::Update(GameState& state)
 void ShopScene::Render(const GameState& state)
 {
     COORD res = GetConsoleResolution();
-    string esc = "[ESC]를 눌러 상점을 나갈 수 있습니다.";
+    string esc = "[B]를 눌러 상점을 나갈 수 있습니다.";
     int x = (res.X - (int)esc.length()) / 2;
     SetColor();
     GotoXY(x, res.Y - 1);
@@ -267,7 +271,7 @@ void ShopScene::Render(const GameState& state)
     }
 
     RenderSixSeven(state);
-}
+}   
 
 void ShopScene::RenderSixSeven(const GameState& state)
 {

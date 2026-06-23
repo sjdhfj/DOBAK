@@ -29,6 +29,11 @@ void SetConsoleWindowStyle(bool showTitleBar);
 void ShakeConsoleWindow(int intensity, int duration, int interval);
 void UpdateShakeConsoleWindow();
 
+void StartConsoleShrink(int durationMs, float minScale = 0.05f);
+void UpdateConsoleShrink();
+bool IsConsoleShrinkFinished();
+void RestoreConsoleWindowSize();
+
 void GotoXY(int x, int y);
 BOOL IsGotoXY(int x, int y);
 
