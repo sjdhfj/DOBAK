@@ -8,7 +8,7 @@ int selectedChoice = 0;
 bool isShowingResult = false;
 string curResultText;
 ULONGLONG resultStartTime = 0;
-constexpr ULONGLONG ResultShowMs = 3000;
+constexpr ULONGLONG ResultShowMs = 5;
 
 void EncounterScene::Init(GameState& state)
 {
@@ -71,9 +71,7 @@ void EncounterScene::Update(GameState& state)
     {
         EncounterChoice& choice = curEncounter.choices[selectedChoice];
 
-        ApplyChoice(choice, state);
-
-        curResultText = choice.resultText;
+        curResultText = ApplyChoice(choice, state);
         isShowingResult = true;
         resultStartTime = state.curTime;
 
@@ -127,24 +125,50 @@ void EncounterScene::DrawResult()
 }
 
 
-void EncounterScene::ApplyChoice(const EncounterChoice& choice, GameState& state)
+string EncounterScene::ApplyChoice(const EncounterChoice& choice, GameState& state)
 {
     switch (choice.resultType)
     {
     case EncounterChoiceResultType::Gold:
         state.player.gold += choice.gold;
-        break;
+        return choice.resultText;
+
+    case EncounterChoiceResultType::GoldPercent:
+    {
+        long long amount = state.player.gold * choice.goldPercent / 100;
+        state.player.gold += amount;
+
+        if (state.player.gold < 0)
+            state.player.gold = 0;
+
+        long long displayAmount = amount;
+
+        if (displayAmount < 0)
+            displayAmount *= -1;
+
+        string result = choice.resultText;
+        string key = "{gold}";
+        string value = std::to_string(displayAmount);
+
+        int pos = (int)result.find(key);
+        if (pos != string::npos)
+            result.replace(pos, key.size(), value);
+
+        return result;
+    }
 
     case EncounterChoiceResultType::Item:
         state.player.inventory.push_back(choice.item);
-        break;
+        return choice.resultText;
 
     case EncounterChoiceResultType::Nothing:
-        break;
+        return choice.resultText;
 
     case EncounterChoiceResultType::GoShop:
-        break;
+        return choice.resultText;
     }
+
+    return choice.resultText;
 }
 
 void EncounterScene::DrawTextBox()

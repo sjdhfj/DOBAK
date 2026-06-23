@@ -18,5 +18,5 @@ private:
     void DrawShopLike();
     void DrawChoices();
     void DrawResult();
-    void ApplyChoice(const EncounterChoice& choice, GameState& state);
+    string ApplyChoice(const EncounterChoice& choice, GameState& state);
 };
