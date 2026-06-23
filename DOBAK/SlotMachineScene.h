@@ -16,7 +16,7 @@ class InGameScene : public AbstractScene
 	void DrawUI(const GameState& state);
 	bool IsPatternMatched(int startY,int startX,const Pattern& pattern);
 	void DrawPlusGold();
-	void DrawProbabilityUI(const GameState& state);
+	void DrawPatternValuePanel(const GameState& state);
 	void DrawInventoryUI(GameState& state);
 	void DrawSlotMachine();
 	void DrawSlotNumbers();
