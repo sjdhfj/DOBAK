@@ -21,8 +21,6 @@ void NextDayScene::Init(GameState& state)
 
         if (!met)
         {
-            // gold/dailyQuota가 둘 다 long long이므로 그냥 빼기만 하면 정상적으로 음수/양수 판단 가능.
-            // 그래도 혹시 모를 음수 결과는 0으로 클램프(이월액이 음수가 되는 걸 방지).
             long long shortfall = std::max<long long>(0, state.dailyQuota - state.player.gold);
             state.carryOverQuota += shortfall;
             state.quotaFailCount++;
@@ -35,7 +33,7 @@ void NextDayScene::Init(GameState& state)
         }
         else
         {
-            state.carryOverQuota = 0; // 달성하면 이월 해소
+            state.carryOverQuota = 0;
         }
 
         if (!state.requestEndGame)
@@ -47,9 +45,6 @@ void NextDayScene::Init(GameState& state)
             }
             else
             {
-                // 이전엔 state.dailyQuota * pow(1.5, week-1) 로 계산해서
-                // 이미 누적된 dailyQuota에 거듭제곱을 또 곱하는 이중 누적 버그가 있었음.
-                // 이제는 항상 "기준 골드(base=10) x 주차"로부터 새로 계산해서 누적 폭주를 방지.
                 state.baseQuota = CalcQuotaForWeek(state.week, 10);
                 state.dailyQuota = state.baseQuota + state.carryOverQuota;
                 state.quotaMet = false;

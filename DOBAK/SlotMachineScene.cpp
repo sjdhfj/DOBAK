@@ -4,9 +4,12 @@
 #include "SlotMachineScene.h"
 #include "Console.h"
 #include "AsciiArt.h"
+#include <algorithm>
 #include "Pattern.h"
 #include "SceneManager.h"
 #include "SoundManager.h"
+#include "Cheater.h"
+
 constexpr int SIXSEVENPOS = 30;
 constexpr int SpinsPerDay = 5;
 constexpr int BaseSpinMs = 1500;
@@ -39,6 +42,8 @@ ULONGLONG lastPatternBlinkTime = 0;
 
 ItemEffectContext curItemEffects{};
 
+static Cheater cheater;
+
 constexpr int InvX = 1;
 constexpr int InvY = 3;
 constexpr int CellW = 7;
@@ -47,8 +52,9 @@ constexpr int CellH = ArtH + 2;
 constexpr int InvCols = 3;
 constexpr int InvRows = 4;
 constexpr int InvMax = InvCols * InvRows;
+constexpr int DaysPerWeek = 3;
 
-int baseReward = 0;
+long long baseReward = 0;
 
 bool isResultBlinking = false;
 bool isResultBlinkYellow = false;
@@ -56,7 +62,6 @@ int resultBlinkCount = 0;
 ULONGLONG lastResultBlinkTime = 0;
 bool pendingSixSevenEvent = false;
 
-//패턴 블링크
 constexpr int MaxPatternBlinkIntervalMs = 60;
 constexpr int MinPatternBlinkIntervalMs = 20;
 constexpr int PatternBlinkSpeedStepMs = 5;
@@ -67,8 +72,73 @@ static void OnSpinComplete(GameState& state)
     if (state.dailySpinCount >= SpinsPerDay)
     {
         state.dailySpinCount = 0;
-        state.requestNextDay = true;
+
+        if (state.day % DaysPerWeek == 0)
+        {
+            state.quotaFromDayEnd = true;
+            state.requestQuotaCheck = true;
+        }
+        else
+        {
+            state.requestNextDay = true;
+        }
     }
+}
+
+static string BuildEffectNotice(const ItemEffectContext& ctx,
+    int pw, int ph, long long thisReward)
+{
+    vector<string> parts;
+    char buf[48]{};
+
+    for (const auto& pb : ctx.patternBonuses)
+    {
+        if (pb.targetWidth == pw && pb.targetHeight == ph)
+        {
+            if (pb.multiplier != 1.0f)
+            {
+                snprintf(buf, sizeof(buf), "%dx%d x%.0f배", pw, ph, pb.multiplier);
+                parts.push_back(buf);
+            }
+            if (pb.flatBonus != 0)
+            {
+                snprintf(buf, sizeof(buf), "%dx%d +%dG", pw, ph, pb.flatBonus);
+                parts.push_back(buf);
+            }
+        }
+    }
+    if (ctx.multiplier != 1.0f)
+    {
+        snprintf(buf, sizeof(buf), "배율 x%.2f", ctx.multiplier);
+        parts.push_back(buf);
+    }
+    if (ctx.coin != 0)
+    {
+        snprintf(buf, sizeof(buf), "고정 %+dG", ctx.coin);
+        parts.push_back(buf);
+    }
+    if (ctx.comboBonusPerPattern != 0)
+    {
+        snprintf(buf, sizeof(buf), "콤보 +%dG", ctx.comboBonusPerPattern);
+        parts.push_back(buf);
+    }
+    if (ctx.sizeBonus != 0)
+    {
+        snprintf(buf, sizeof(buf), "칸당 +%dG(%dx%d)", ctx.sizeBonus, pw, ph);
+        parts.push_back(buf);
+    }
+
+    if (parts.empty()) return "";
+
+    string result = "[효과 발동] ";
+    for (int i = 0; i < (int)parts.size(); ++i)
+    {
+        if (i > 0) result += " / ";
+        result += parts[i];
+    }
+    snprintf(buf, sizeof(buf), "  -> +%lldG", thisReward);
+    result += buf;
+    return result;
 }
 
 void InGameScene::Init(GameState& state)
@@ -95,15 +165,20 @@ void InGameScene::Init(GameState& state)
         for (int j = 0; j < width; ++j)
             slotArr[i][j] = 0;
 
+    _lastEffectStr = "";
     DrawPatternValuePanel(state);
 }
 
 void InGameScene::Update(GameState& state)
 {
+    cheater.Update(state);
+
     if (GetKeyDown('B'))
         SceneManager::GetInst()->ChangeScene("ShopScene", state);
     if (GetKeyDown('G'))
         SceneManager::GetInst()->ChangeScene("QuotaScene", state);
+    if (GetKeyDown('Q'))
+        SceneManager::GetInst()->ChangeScene("EndingScene", state);
 
     if (GetKeyDown(VK_SPACE) && slotState == SlotMachineState::Idle)
     {
@@ -112,6 +187,7 @@ void InGameScene::Update(GameState& state)
         isResultBlinking = false;
         isResultBlinkYellow = false;
         resultBlinkCount = 0;
+        _lastEffectStr = "";
         curItemEffects = CollectItemEffects(state);
 
         slotState = SlotMachineState::Rolling;
@@ -226,7 +302,8 @@ void InGameScene::Update(GameState& state)
         if (resultBlinkCount >= ResultBlinkTimes && !isResultBlinkYellow)
         {
             isResultBlinking = false;
-            state.player.gold += baseReward;
+            _lastEffectStr = "";
+            state.player.gold += std::max<long long>(0, baseReward);
             SOUND->Play("SlotMoney");
 
             if (pendingSixSevenEvent)
@@ -275,9 +352,42 @@ void InGameScene::Render(const GameState& state)
     DrawInventory(state);
     DrawSlotMachine();
     DrawSlotNumbers();
+    DrawEffectNotice();
     DrawSixSeven();
     DrawPlusGold();
     DrawPatternValuePanel(state);
+
+    COORD res = GetConsoleResolution();
+    int cheatY = res.Y - 1;
+    GotoXY(0, cheatY);
+    cout << string(30, ' ');
+    if (cheater.IsActive())
+    {
+        SetColor(Color::LIGHT_RED);
+        GotoXY(0, cheatY);
+        cout << "[Cheater 활성화중]";
+        SetColor();
+    }
+}
+
+void InGameScene::DrawEffectNotice()
+{
+    int noticeX = titleX;
+    int noticeY = titleY + (int)asciiArts.slotMachine.size();
+
+    GotoXY(noticeX, noticeY);
+    cout << string(55, ' ');
+
+    if (_lastEffectStr.empty()) return;
+
+    if (slotState == SlotMachineState::Blinking && isPatternBlink)
+        SetColor(Color::BLACK, _lastEffectColor);
+    else
+        SetColor(_lastEffectColor);
+
+    GotoXY(noticeX, noticeY);
+    cout << " " << _lastEffectStr << " ";
+    SetColor();
 }
 
 void InGameScene::DrawPlusGold()
@@ -324,7 +434,6 @@ void InGameScene::DrawUI(const GameState& state)
 
 void InGameScene::DrawInventory(const GameState& state)
 {
-
     GotoXY(InvX, InvY);
     SetColor(Color::LIGHT_YELLOW);
     cout << "[ 보유 아이템 ]";
@@ -410,59 +519,52 @@ void InGameScene::DrawPatternValuePanel(const GameState& state)
 {
     COORD res = GetConsoleResolution();
 
-    constexpr int panelWidth = 18;
+    constexpr int panelWidth = 22;
     int panelX = res.X - panelWidth;
     int panelY = 0;
 
     SetColor(Color::LIGHT_YELLOW);
     GotoXY(panelX, panelY);
-    cout << "+================+";
+    cout << "+" << string(panelWidth - 2, '=') << "+";
 
     GotoXY(panelX, panelY + 1);
-    cout << "| PATTERN VALUE  |";
+    cout << "|  PATTERN VALUE   |";
 
     GotoXY(panelX, panelY + 2);
-    cout << "+================+";
+    cout << "+" << string(panelWidth - 2, '=') << "+";
 
     for (int i = 0; i < GamePatternCount; ++i)
     {
         const Pattern& pattern = GamePatterns[i];
 
         string valueText;
+        if (pattern.eventType == PatternEventType::SixSeven) valueText = "x2 EVENT";
+        else if (pattern.eventType == PatternEventType::SixOne)   valueText = "RESET";
+        else                                                        valueText = std::to_string(pattern.reward) + "G";
 
-        if (pattern.eventType == PatternEventType::Gold)
-        {
-            valueText = std::to_string(pattern.reward) + "G";
-        }
-        else if (pattern.eventType == PatternEventType::SixSeven)
-        {
-            valueText = "x2 EVENT";
-        }
-        else if (pattern.eventType == PatternEventType::SixOne)
-        {
-            valueText = "EVENT";
-        }
-        else
-        {
-            valueText = "EVENT";
-        }
+        int maxContent = panelWidth - 4;
+        string name = pattern.patternName;
+        string sep = ":";
+        int valW = (int)valueText.size();
+        int nameW = maxContent - valW - 1;
+        if (nameW < 1) nameW = 1;
+        if ((int)name.size() > nameW)
+            name = name.substr(0, nameW);
 
-        string line = pattern.patternName + " : " + valueText;
-
-        if ((int)line.size() > panelWidth - 3)
-            line = line.substr(0, panelWidth - 3);
+        int gap = maxContent - (int)name.size() - 1 - valW;
+        string line = name + string(std::max(0, gap), ' ') + sep + valueText;
 
         GotoXY(panelX, panelY + 3 + i);
-        SetColor(Color::WHITE);
-        cout << "| " << std::left << std::setw(panelWidth - 3) << line << "|";
+        SetColor(pattern.eventType == PatternEventType::Gold ? Color::WHITE : Color::LIGHT_YELLOW);
+        cout << "| " << std::left << std::setw(maxContent) << line << " |";
     }
 
     SetColor(Color::LIGHT_YELLOW);
     GotoXY(panelX, panelY + 3 + GamePatternCount);
-    cout << "+================+";
-
+    cout << "+" << string(panelWidth - 2, '=') << "+";
     SetColor();
 }
+
 void InGameScene::DrawSlotMachine()
 {
     if (isResultBlinking && isResultBlinkYellow)
@@ -538,7 +640,6 @@ void InGameScene::ClearSixSeven()
     SetDefaultMode();
 }
 
-
 bool InGameScene::IsCurrentPatternCell(int y, int x)
 {
     if (slotState != SlotMachineState::Blinking)         return false;
@@ -552,7 +653,7 @@ bool InGameScene::IsCurrentPatternCell(int y, int x)
 
 int InGameScene::CheckPatternReward(const Pattern& pattern)
 {
-    int total = 0;
+    long long total = 0;
     for (int y = 0; y <= height - pattern.height; ++y)
         for (int x = 0; x <= width - pattern.width; ++x)
             if (IsSameInArea(y, x, pattern.width, pattern.height))
@@ -612,16 +713,38 @@ void InGameScene::ExecutePatternEvent(const Pattern& pattern, GameState& state)
     {
     case PatternEventType::Gold:
     {
-        int patternReward = pattern.reward;
-
+        long long patternReward = pattern.reward;
         patternReward += curItemEffects.coin;
-        patternReward +=
-            curItemEffects.comboBonusPerPattern * curPatternIndex;
+        patternReward += (long long)curItemEffects.comboBonusPerPattern * curPatternIndex;
 
-        patternReward =
-            (int)(patternReward * curItemEffects.multiplier);
+        patternReward += (long long)curItemEffects.sizeBonus * pattern.width * pattern.height;
+
+        float patternMult = 1.0f;
+        for (const auto& pb : curItemEffects.patternBonuses)
+        {
+            if (pb.targetWidth == pattern.width && pb.targetHeight == pattern.height)
+            {
+                patternMult *= pb.multiplier;
+                patternReward += pb.flatBonus;
+            }
+        }
+
+        float globalMult = curItemEffects.multiplier;
+        if (!std::isfinite(globalMult) || globalMult <= 0.0f) globalMult = 1.0f;
+        if (!std::isfinite(patternMult) || patternMult <= 0.0f) patternMult = 1.0f;
+        globalMult = std::min(globalMult, 67.0f);
+        patternMult = std::min(patternMult, 67.0f);
+
+        patternReward = (long long)(patternReward * patternMult);
+        patternReward = (long long)(patternReward * globalMult);
+        patternReward = std::max<long long>(pattern.reward, patternReward);
 
         baseReward += patternReward;
+
+        _lastEffectStr = BuildEffectNotice(curItemEffects, pattern.width, pattern.height, patternReward);
+        if (patternReward >= 500) _lastEffectColor = Color::LIGHT_YELLOW;
+        else if (patternReward >= 100) _lastEffectColor = Color::LIGHT_GREEN;
+        else                           _lastEffectColor = Color::CYAN;
         break;
     }
 
@@ -634,12 +757,12 @@ void InGameScene::ExecutePatternEvent(const Pattern& pattern, GameState& state)
     case PatternEventType::SixOne:
     {
         baseReward = 0;
-
+        break;
     }
     }
 }
 
-bool InGameScene::IsPatternMatched(int startY,int startX,const Pattern& pattern)
+bool InGameScene::IsPatternMatched(int startY, int startX, const Pattern& pattern)
 {
     if (pattern.type == PatternType::Same)
     {
@@ -670,4 +793,3 @@ bool InGameScene::IsPatternMatched(int startY,int startX,const Pattern& pattern)
 
     return false;
 }
-

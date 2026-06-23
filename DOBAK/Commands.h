@@ -12,17 +12,6 @@ public:
 private:
     int amount;
 };
-class ProbabilityCommand : public ICommand
-{
-public:
-    ProbabilityCommand(int probability) : probability(probability) {}
-    void Execute(ItemEffectContext& _context) override
-    {
-        _context.probability += probability;
-    }
-private:
-    int probability;
-};
 class MultiplierGoldCommand : public ICommand
 {
 public:
@@ -86,4 +75,16 @@ private:
     int   _w, _h;
     float _mult;
     int   _flat;
+};
+
+class PatternSizeBonusCommand : public ICommand
+{
+public:
+    PatternSizeBonusCommand(int _bonusPerCell) : bonusPerCell(_bonusPerCell) {}
+    void Execute(ItemEffectContext& _context) override
+    {
+        _context.sizeBonus += bonusPerCell;
+    }
+private:
+    int bonusPerCell;
 };
