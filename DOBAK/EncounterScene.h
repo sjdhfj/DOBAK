@@ -2,43 +2,7 @@
 #include "Scene.h"
 #include "Console.h"
 #include "SceneManager.h"
-#include "Item.h"
-#include <vector>
-#include <string>
-
-enum class EncounterViewType
-{
-    TextBox,
-    BigAscii,
-    ShopLike
-};
-
-enum class EncounterChoiceResultType
-{
-    Gold,
-    Item,
-    Nothing,
-    GoShop
-};
-
-struct EncounterChoice
-{
-    string text;
-    EncounterChoiceResultType resultType;
-    int gold = 0;
-    Item item;
-
-    string resultText;
-};
-
-struct EncounterData
-{
-    string title;
-    vector<string> lines;
-    EncounterViewType viewType;
-    vector<string> asciiArt;
-    vector<EncounterChoice> choices;
-};
+#include "EncounterData.h"
 
 class EncounterScene : public AbstractScene
 {
