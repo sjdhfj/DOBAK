@@ -28,7 +28,7 @@ void NextDayScene::Init(GameState& state)
             {
                 state.isWinEnding = false;
                 state.requestEndGame = true;
-                PlayOpenTransition(state, 1);
+                PlayOpenTransition(state, .7f);
                 return;
             }
         }
@@ -43,23 +43,28 @@ void NextDayScene::Init(GameState& state)
             {
                 state.isWinEnding = true;
                 state.requestEndGame = true;
-                PlayOpenTransition(state, 1);
+                PlayOpenTransition(state, .7f);
                 return;
             }
-            state.baseQuota = CalcQuotaForWeek(state.week, 10);   // ★ 10으로 통일
+            state.baseQuota = CalcQuotaForWeek(state.week, 10);
             state.dailyQuota = state.baseQuota + state.carryOverQuota;
             state.quotaMet = false;
         }
     }
 
-    PlayOpenTransition(state, 1);
+    PlayOpenTransition(state, .7f);
 }
 void NextDayScene::Update(GameState& state)
 {
     if (GetKeyDown(VK_RETURN) || GetKeyDown(VK_SPACE))
     {
-        PlayCloseTransition(state, 1);
-        SceneManager::GetInst()->ChangeScene("ShopScene", state);
+        PlayCloseTransition(state, .9f);
+        if (rand() % 100 + 1 <= 50)
+        {
+            SceneManager::GetInst()->ChangeScene("EncounterScene", state);
+        }
+        else
+            SceneManager::GetInst()->ChangeScene("ShopScene", state);
     }
 }
 
