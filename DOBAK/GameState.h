@@ -14,7 +14,7 @@ constexpr int HEIGHT = 45;
 struct PlayerData
 {
 	std::vector<Item> inventory;
-	long long gold = 0;
+	unsigned long long gold = 0;
 };
 struct GameState
 {
@@ -27,7 +27,7 @@ struct GameState
 	int day = 1;
 	long long goldAtDayStart = 0;
 	int dailySpinCount = 0;
-	long long dailyQuota = 10;
+	unsigned long long dailyQuota = 100;
 	bool quotaMet = false;
 	bool quotaSubmitted = false;
 	int  quotaIncreaseDay = 3;
@@ -38,7 +38,7 @@ struct GameState
 	int quotaFailCount = 0;
 	bool requestEndGame = false;
 	long long carryOverQuota = 0;
-	long long baseQuota = dailyQuota;
+	unsigned long long baseQuota = dailyQuota;
 };
 inline long long CalcQuotaForWeek(int week, long long base)
 {
