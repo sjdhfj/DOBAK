@@ -16,7 +16,10 @@ int main()
 	SOUND->Load("Rolling", "Sound/SlotRolling.mp3");
 	SOUND->Load("SlotEmission", "Sound/SlotEmission.mp3");
 	SOUND->Load("SlotMoney", "Sound/SlotMoney.mp3");
+	SOUND->Load("Tung", "Sound/TungSound.mp3");
+
 	SOUND->PlayBGM("Sound/f.mp3");
+	
 	while (state.isRunning)
 	{
 		state.curTime = GetTickCount64();

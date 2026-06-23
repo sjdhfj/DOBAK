@@ -3,20 +3,14 @@
 #include "Console.h"
 #include "SceneManager.h"
 #include "Item.h"
-
-enum class EncounterType
-{
-    Gold,
-    Item,
-    Show
-};
+#include <vector>
+#include <string>
 
 enum class EncounterViewType
 {
     TextBox,
     BigAscii,
-    ShopLike,
-    BattleLike
+    ShopLike
 };
 
 enum class EncounterChoiceResultType
@@ -33,15 +27,15 @@ struct EncounterChoice
     EncounterChoiceResultType resultType;
     int gold = 0;
     Item item;
+
+    string resultText;
 };
 
 struct EncounterData
 {
     string title;
     vector<string> lines;
-
     EncounterViewType viewType;
-
     vector<string> asciiArt;
     vector<EncounterChoice> choices;
 };
@@ -55,14 +49,10 @@ public:
     void Release() override {}
 
 private:
-    EncounterType encounterType;
-    string title;
-    string desc;
-    long long goldReward = 0;
-    Item rewardItem;
-
-    bool rewardApplied = false;
-
-    void RollEncounter(GameState& state);
-    void ApplyReward(GameState& state);
+    void DrawTextBox();
+    void DrawBigAscii();
+    void DrawShopLike();
+    void DrawChoices();
+    void DrawResult();
+    void ApplyChoice(const EncounterChoice& choice, GameState& state);
 };
