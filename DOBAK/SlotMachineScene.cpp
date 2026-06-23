@@ -72,7 +72,7 @@ static void OnSpinComplete(GameState& state)
     if (state.dailySpinCount >= SpinsPerDay)
     {
         state.dailySpinCount = 0;
-        bool isWeekEndDay = (state.day % DaysPerWeek == 0); // day++ 전, 끝낸 날 기준
+        bool isWeekEndDay = (state.day % DaysPerWeek == 0);
         state.day++;
 
         if (isWeekEndDay)

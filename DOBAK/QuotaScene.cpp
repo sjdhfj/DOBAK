@@ -106,7 +106,7 @@ void QuotaScene::Update(GameState& state)
     {
         state.quotaSubmitted = true;
         PlaySubmitAnimation(state);
-        PlayCloseTransition(state, 1);
+        PlayCloseTransition(state, .7f);
 
         if (state.quotaFromDayEnd && !state.quotaMet)
         {
