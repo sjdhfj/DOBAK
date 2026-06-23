@@ -82,8 +82,7 @@ constexpr ULONGLONG ResultShowMs = 3000;
 
 void EncounterScene::Init(GameState& state)
 {
-    system("cls");
-    SOUND->PlayBGM("Sound/b.mp3");
+    SOUND->PlayBGM("Sound/l.mp3");
     SetConsoleSize(WIDTH, HEIGHT);
 
     selectedChoice = 0;
