@@ -257,7 +257,7 @@ void ShopScene::Render(const GameState& state)
 
     GotoXY(ShopX, ListY + ListMax + 2 + DescLines + 1);
     SetColor(Color::LIGHT_YELLOW);
-    cout << "Gold: " << std::left << std::setw(10) << state.player.gold << "G";
+    cout << "니 돈: " << std::left << std::setw(10) << state.player.gold << "G";
 
     SetColor();
     int y = 1;

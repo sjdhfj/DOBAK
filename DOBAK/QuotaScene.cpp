@@ -5,7 +5,7 @@
 constexpr int PanelW = 44;
 constexpr int BarW = 16;
 constexpr int TotalWeeks = 67;
-constexpr int MaxQuotaFails = 3;
+constexpr int MaxQuotaFails = 1;
 constexpr int DaysPerWeek = 3;
 
 static int StrDispW(const string& s)
@@ -102,13 +102,13 @@ void QuotaScene::Update(GameState& state)
 {
     state.quotaMet = (state.player.gold >= (int)state.dailyQuota);
 
-    if (!state.quotaSubmitted && (GetKeyDown(VK_RETURN) ))
+    if (state.quotaFromDayEnd && !state.quotaSubmitted && GetKeyDown(VK_RETURN))
     {
         state.quotaSubmitted = true;
         PlaySubmitAnimation(state);
         PlayCloseTransition(state, .7f);
 
-        if (state.quotaFromDayEnd && !state.quotaMet)
+        if (!state.quotaMet)
         {
             state.isWinEnding = false;
             state.requestEndGame = true;
@@ -151,7 +151,7 @@ void QuotaScene::Render(const GameState& state)
     else
     {
         SetColor(Color::LIGHT_GRAY);
-        cout << Centered("[ENTER] 제출 후 다음날   [ESC] 돌아가기", PanelW);
+        cout << Centered("[ESC] 돌아가기 (열람만 가능)", PanelW);
     }
     SetColor();
 }

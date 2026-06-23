@@ -179,7 +179,6 @@ void ShopItemInit(GameState& state)
                         new MultiplierGoldCommand(1.67f) }),
                     { " ___ ", "(g67)", " --- " } },
 
-                    // ── 67 크기 보너스 계열 ──────────────────────────────────
                     { 7010, "67의 크기욕심",
                       "패턴 한 칸당 6G 추가. 넓을수록 67이 더 좋아한다.",
                       200, ItemType::EQUIP, new PatternSizeBonusCommand(6),
