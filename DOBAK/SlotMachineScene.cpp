@@ -526,8 +526,50 @@ void InGameScene::DrawInventory(const GameState& state)
     SetColor();
 }
 
+static long long CalcPatternPanelReward(const Pattern& pattern, const ItemEffectContext& effects)
+{
+    long long reward = pattern.reward;
+
+    reward += effects.coin;
+    reward += (long long)effects.sizeBonus * pattern.width * pattern.height;
+
+    float patternMult = 1.0f;
+
+    for (const auto& pb : effects.patternBonuses)
+    {
+        if (pb.targetWidth == pattern.width &&
+            pb.targetHeight == pattern.height)
+        {
+            patternMult *= pb.multiplier;
+            reward += pb.flatBonus;
+        }
+    }
+
+    float globalMult = effects.multiplier;
+
+    if (std::isnan(globalMult) || globalMult <= 0.0f)
+        globalMult = 1.0f;
+    else if (!std::isfinite(globalMult))
+        globalMult = 67.0f;
+    else
+        globalMult = std::min(globalMult, 67.0f);
+
+    if (std::isnan(patternMult) || patternMult <= 0.0f)
+        patternMult = 1.0f;
+    else if (!std::isfinite(patternMult))
+        patternMult = 67.0f;
+    else
+        patternMult = std::min(patternMult, 67.0f);
+
+    reward = (long long)(reward * patternMult);
+    reward = (long long)(reward * globalMult);
+
+    return std::max<long long>(pattern.reward, reward);
+}
+
 void InGameScene::DrawPatternValuePanel(const GameState& state)
 {
+    ItemEffectContext panelEffects = CollectItemEffects(state);
     COORD res = GetConsoleResolution();
 
     constexpr int panelWidth = 22;
@@ -564,7 +606,10 @@ void InGameScene::DrawPatternValuePanel(const GameState& state)
         if (pattern.eventType == PatternEventType::SixOne)
             valueText = "RESET";
         else
-            valueText = std::to_string(pattern.reward) + "G";
+        {
+            long long displayReward = CalcPatternPanelReward(pattern, panelEffects);
+            valueText = std::to_string(displayReward) + "G";
+        }
 
         int maxContent = panelWidth - 4;
         string name = pattern.patternName;
@@ -778,12 +823,12 @@ bool InGameScene::IsSameInArea(int startY, int startX, int pw, int ph)
     return true;
 }
 
-ItemEffectContext InGameScene::CollectItemEffects(GameState& state)
+ItemEffectContext InGameScene::CollectItemEffects(const GameState& state)
 {
     ItemEffectContext ctx{};
     ctx.multiplier = 1.0f;
 
-    for (Item& item : state.player.inventory)
+    for (const Item& item : state.player.inventory)
         if (item.type == ItemType::EQUIP && item.effect)
             item.effect->Execute(ctx);
 
